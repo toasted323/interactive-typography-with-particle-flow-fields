@@ -1,0 +1,28 @@
+{
+    "name": "interactive-typography-with-particle-flow-fields",
+    "version": "0.0.0-development",
+    "description": "Interactive typography experiment with procedural flow fields and particles. Inspired by an original AS3 implementation, reimagined in JavaScript.",
+    "scripts": {
+        "start": "serve ."
+    },
+    "keywords": [
+        "javascript",
+        "canvas",
+        "typography",
+        "particles",
+        "flow fields",
+        "interactive",
+        "procedural",
+        "noise"
+    ],
+    "author": "github.com/toasted323",
+    "license": "MIT",
+    "devDependencies": {
+        "serve": "^14.2.0",
+        "eslint": "^8.0.0"
+    },
+    "dependencies": {
+        "tweakpane": "^4.0.5"
+    },
+    "private": true
+}
