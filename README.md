@@ -11,12 +11,14 @@ Inspired by an original AS3 implementation, reimagined in JavaScript.
 - [File Structure](#file-structure)
 - [Noise Implementations & Attribution](#noise-implementations--attribution)
 - [Licensing](#licensing)
+- [Attribution](#attribution)
 - [References](#references)
 - [Contact](#contact)
 
 ---
 
 ## Live Demos
+
 
 These live demos are both interactive showcases and also serve as visual testing environments.
 
