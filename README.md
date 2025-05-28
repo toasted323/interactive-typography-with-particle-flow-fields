@@ -7,11 +7,20 @@ Inspired by an original AS3 implementation, reimagined in JavaScript.
 
 ## Table of Contents
 
+- [Live Demos](#live-demos)
 - [File Structure](#file-structure)
 - [Noise Implementations & Attribution](#noise-implementations--attribution)
 - [Licensing](#licensing)
 - [References](#references)
 - [Contact](#contact)
+
+---
+
+## Live Demos
+
+These live demos are both interactive showcases and also serve as visual testing environments.
+
+- [Noise2DTime Demo](https://toasted323.github.io/interactive-typography-with-particle-flow-fields/demos/noise2dtime/)
 
 ---
 
