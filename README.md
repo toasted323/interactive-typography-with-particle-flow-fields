@@ -24,6 +24,7 @@ These live demos are both interactive showcases and also serve as visual testing
 
 - [Noise2DTime Demo](https://toasted323.github.io/interactive-typography-with-particle-flow-fields/demos/noise2dtime/)
 - [TypographyBuilder Demo](https://toasted323.github.io/interactive-typography-with-particle-flow-fields/demos/typography-builder/)
+- [LayerStack Demo](https://toasted323.github.io/interactive-typography-with-particle-flow-fields/demos/layer-stack/)
 
 ---
 
