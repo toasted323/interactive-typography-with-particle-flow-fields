@@ -23,6 +23,7 @@ Inspired by an original AS3 implementation, reimagined in JavaScript.
 These live demos are both interactive showcases and also serve as visual testing environments.
 
 - [Noise2DTime Demo](https://toasted323.github.io/interactive-typography-with-particle-flow-fields/demos/noise2dtime/)
+- [TypographyBuilder Demo](https://toasted323.github.io/interactive-typography-with-particle-flow-fields/demos/typography-builder/)
 
 ---
 
