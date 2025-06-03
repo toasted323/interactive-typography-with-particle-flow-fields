@@ -21,10 +21,45 @@ const defaultNoiseLayerParams = {
   gain: 1,
 };
 
+const defaultTypographyLayerParams = {
+  // Text
+  text: "Layer Stack",
+  fontFamily: "Arial",
+  fontSizeAuto: true,
+  fontSizeManual: 48,
+  padding: 60,
+
+  // Fill & stroke
+  fillStyle: "#0000ff",
+  strokeStyle: "#000099",
+  strokeWidth: 3,
+  useGradient: false,
+  gradientColors: ["#000066", "#0000ff", "#000066"],
+
+  // Glow & shadow
+  glowColor: "#0000cc",
+  glowSize: 10,
+  shadowOffsetX: 0,
+  shadowOffsetY: 0,
+
+  // Blur
+  blurAmount: 3,
+
+  // Inner glow
+  innerGlowColor: "#000044",
+  innerGlowBlur: 0,
+
+  // Background
+  backgroundColor: "#111111",
+};
+
 function getDefaultState() {
   return {
     // Noise layer
     noiseLayer: { ...defaultNoiseLayerParams },
+
+    // Typography layer
+    typographyLayer: { ...defaultTypographyLayerParams },
 
     // Main
     animating: true,
@@ -52,7 +87,7 @@ let updateNoiseFolderVisibility;
 {
   const noiseLayerFolder = pane.addFolder({
     title: "Noise Layer Params",
-    expanded: false,
+    expanded: true,
   });
 
   // Noise type selector
@@ -114,6 +149,143 @@ let updateNoiseFolderVisibility;
   noiseLayerFolder.on("change", updateNoiseFolderVisibility);
 }
 
+// Typography layer params
+let typographyDirty = true;
+{
+  const typographyLayerFolder = pane.addFolder({
+    title: "Typography Layer Params",
+    expanded: true,
+  });
+
+  // --- Text ---
+  const textFolder = typographyLayerFolder.addFolder({
+    title: "Text",
+    expanded: false,
+  });
+  textFolder.addBinding(state.typographyLayer, "text");
+  textFolder.addBinding(state.typographyLayer, "fontFamily", {
+    options: {
+      Arial: "Arial",
+      Verdana: "Verdana",
+      "Times New Roman": "Times New Roman",
+    },
+  });
+  textFolder.addBinding(state.typographyLayer, "fontSizeAuto", {
+    label: "Auto Font Size",
+  });
+  const paddingBinding = textFolder.addBinding(
+    state.typographyLayer,
+    "padding",
+    {
+      min: 0,
+      max: 200,
+      step: 1,
+    }
+  );
+  const manualFontSizeBinding = textFolder.addBinding(
+    state.typographyLayer,
+    "fontSizeManual",
+    { min: 8, max: 200, step: 1, label: "Manual Font Size" }
+  );
+
+  // --- Fill & Stroke ---
+  const fillStrokeFolder = typographyLayerFolder.addFolder({
+    title: "Fill & Stroke",
+    expanded: false,
+  });
+  fillStrokeFolder.addBinding(state.typographyLayer, "fillStyle", {
+    view: "color",
+  });
+  fillStrokeFolder.addBinding(state.typographyLayer, "strokeStyle", {
+    view: "color",
+  });
+  fillStrokeFolder.addBinding(state.typographyLayer, "strokeWidth", {
+    min: 0,
+    max: 10,
+    step: 1,
+  });
+  fillStrokeFolder.addBinding(state.typographyLayer, "useGradient", {
+    label: "Use Gradient Fill",
+  });
+  fillStrokeFolder.addBinding(state.typographyLayer.gradientColors, "0", {
+    label: "Gradient Color 1",
+    view: "color",
+  });
+  fillStrokeFolder.addBinding(state.typographyLayer.gradientColors, "1", {
+    label: "Gradient Color 2",
+    view: "color",
+  });
+  fillStrokeFolder.addBinding(state.typographyLayer.gradientColors, "2", {
+    label: "Gradient Color 3",
+    view: "color",
+  });
+
+  // --- Glow & Shadow ---
+  const glowFolder = typographyLayerFolder.addFolder({
+    title: "Glow & Shadow",
+    expanded: false,
+  });
+  glowFolder.addBinding(state.typographyLayer, "glowColor", { view: "color" });
+  glowFolder.addBinding(state.typographyLayer, "glowSize", {
+    min: 0,
+    max: 100,
+    step: 1,
+  });
+  glowFolder.addBinding(state.typographyLayer, "shadowOffsetX", {
+    min: -50,
+    max: 50,
+    step: 1,
+  });
+  glowFolder.addBinding(state.typographyLayer, "shadowOffsetY", {
+    min: -50,
+    max: 50,
+    step: 1,
+  });
+
+  // --- Blur ---
+  const blurFolder = typographyLayerFolder.addFolder({
+    title: "Blur",
+    expanded: false,
+  });
+  blurFolder.addBinding(state.typographyLayer, "blurAmount", {
+    min: 0,
+    max: 50,
+    step: 1,
+  });
+
+  // --- Inner Glow ---
+  const innerGlowFolder = typographyLayerFolder.addFolder({
+    title: "Inner Glow",
+    expanded: false,
+  });
+  innerGlowFolder.addBinding(state.typographyLayer, "innerGlowColor", {
+    view: "color",
+  });
+  innerGlowFolder.addBinding(state.typographyLayer, "innerGlowBlur", {
+    min: 0,
+    max: 50,
+    step: 1,
+  });
+
+  // --- Background ---
+  const bgFolder = typographyLayerFolder.addFolder({
+    title: "Background",
+    expanded: false,
+  });
+  bgFolder.addBinding(state.typographyLayer, "backgroundColor", {
+    view: "color",
+  });
+
+  typographyLayerFolder.on("change", (ev) => {
+    paddingBinding.disabled = !state.typographyLayer.fontSizeAuto;
+    manualFontSizeBinding.disabled = state.typographyLayer.fontSizeAuto;
+    typographyDirty = true;
+  });
+
+  paddingBinding.disabled = !state.typographyLayer.fontSizeAuto;
+  manualFontSizeBinding.disabled = state.typographyLayer.fontSizeAuto;
+}
+
 // General params
 {
   pane.addBinding(state, "speed", {
@@ -160,27 +332,43 @@ const ctx = canvas.getContext("2d");
 const width = canvas.width,
   height = canvas.height;
 
-const typographyCanvas = TypographyBuilder.create(width, height)
-  .text("Layer Stack")
-  .autoFontSize()
-  .padding(60)
-  .fillStyle("#0000ff")
-  .background("#111111")
-  .glow("#000088", 30)
-  .blur(5)
-  .toCanvas();
+// Typography layer
+const blankImageData = new ImageData(width, height);
+const typographyLayer = new ImageDataAdapter(blankImageData, width, height, 2);
 
-const typographyImageData = typographyCanvas
-  .getContext("2d")
-  .getImageData(0, 0, width, height);
+function renderTypographyIfNeeded() {
+  if (typographyDirty) {
+    const t = state.typographyLayer;
+    const builder = TypographyBuilder.create(width, height)
+      .text(t.text)
+      .fontFamily(t.fontFamily)
+      .padding(t.padding)
+      .fillStyle(t.fillStyle)
+      .strokeStyle(t.strokeStyle, t.strokeWidth)
+      .background(t.backgroundColor)
+      .glow(t.glowColor, t.glowSize, t.shadowOffsetX, t.shadowOffsetY)
+      .blur(t.blurAmount)
+      .innerGlow(t.innerGlowColor, t.innerGlowBlur);
 
-const typographyLayer = new ImageDataAdapter(
-  typographyImageData,
-  width,
-  height,
-  2
-);
+    if (t.useGradient) {
+      builder.gradient(t.gradientColors);
+    }
+    if (t.fontSizeAuto) {
+      builder.autoFontSize(true);
+    } else {
+      builder.fontSize(t.fontSizeManual);
+    }
 
+    const typographyCanvas = builder.toCanvas();
+    typographyLayer.imageData = typographyCanvas
+      .getContext("2d")
+      .getImageData(0, 0, width, height);
+    typographyDirty = false;
+  }
+}
+renderTypographyIfNeeded();
+
+// Noise layer
 let noise = null;
 let noiseLayer = null;
 let lastNoiseType = null;
@@ -215,9 +403,11 @@ function instantiateNoiseIfNeeded() {
     noiseLayer.frequency = state.noiseLayer.frequency;
   }
 }
-
 instantiateNoiseIfNeeded();
+
 const stack = new LayerStack([typographyLayer, noiseLayer]);
+
+// Main loop
 
 function update() {
   if (state.animating) {
@@ -232,6 +422,7 @@ function update() {
 }
 
 function render() {
+  renderTypographyIfNeeded();
   instantiateNoiseIfNeeded();
 
   const img = ctx.createImageData(width, height);
