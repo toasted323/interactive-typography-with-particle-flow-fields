@@ -20,15 +20,18 @@ export class LayerStack {
 
   /**
    * Default multiplicative blending function.
+   * Skips disabled layers.
    * @param {Array<Layer>} layers - Array of layers to blend.
    * @param {number} x - X coordinate.
    * @param {number} y - Y coordinate.
-   * @returns {number} Product of all layer values at (x, y).
+   * @returns {number} Product of all enabled layer values at (x, y).
    */
   defaultBlendingFunc(layers, x, y) {
     let value = 1;
     for (const layer of layers) {
-      value *= layer.getValue(x, y);
+      if (layer.enabled) {
+        value *= layer.getValue(x, y);
+      }
     }
     return value;
   }
@@ -50,7 +53,9 @@ export class LayerStack {
   setTime(t) {
     this.time = t;
     for (const layer of this.layers) {
-      layer.setTime(t);
+      if (layer.enabled) {
+        layer.setTime(t);
+      }
     }
   }
 
@@ -61,7 +66,9 @@ export class LayerStack {
   advanceTime(dt) {
     this.time += dt;
     for (const layer of this.layers) {
-      layer.advanceTime(dt);
+      if (layer.enabled) {
+        layer.advanceTime(dt);
+      }
     }
   }
 }

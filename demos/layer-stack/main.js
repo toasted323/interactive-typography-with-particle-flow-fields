@@ -21,6 +21,7 @@ const width = canvas.width,
 // --- State ---
 
 const defaultNoiseLayerParams = {
+  enabled: true,
   type: "PerlinNoise2DTime",
   PerlinNoise2DTime: { seed: 0 },
   FlowNoise2DTime: { seed: 0, spinVariation: 0.2, N: 128 },
@@ -30,6 +31,8 @@ const defaultNoiseLayerParams = {
 };
 
 const defaultTypographyLayerParams = {
+  enabled: true,
+
   // Text
   text: "Layer Stack",
   fontFamily: "Arial",
@@ -65,6 +68,7 @@ function getDefaultState() {
   return {
     // Noise layer mask
     maskLayer: {
+      enableMasking: true,
       radius: 100,
       fadeOutDuration: 1.0,
       autoFadeDuration: 1.0,
@@ -104,6 +108,10 @@ const pane = new Pane({ container: document.getElementById("ui") });
     expanded: true,
   });
 
+  maskFolder.addBinding(state.maskLayer, "enableMasking", {
+    label: "Masking Enabled",
+  });
+
   maskFolder.addBinding(state.maskLayer, "radius", {
     min: 1,
     max: Math.min(width, height) / 2,
@@ -131,6 +139,10 @@ let updateNoiseFolderVisibility;
   const noiseLayerFolder = pane.addFolder({
     title: "Noise Layer Params",
     expanded: true,
+  });
+
+  noiseLayerFolder.addBinding(state.noiseLayer, "enabled", {
+    label: "Layer Enabled",
   });
 
   // Noise type selector
@@ -204,6 +216,10 @@ let typographyDirty = true;
   const typographyLayerFolder = pane.addFolder({
     title: "Typography Layer Params",
     expanded: true,
+  });
+
+  typographyLayerFolder.addBinding(state.typographyLayer, "enabled", {
+    label: "Layer Enabled",
   });
 
   // --- Text ---
@@ -378,35 +394,44 @@ const fpsChart = new FpsChart(document.getElementById("fps-canvas"));
 
 // Typography layer
 const blankImageData = new ImageData(width, height);
-const typographyLayer = new ImageDataAdapter(blankImageData, width, height, 2);
+const typographyLayer = new ImageDataAdapter(
+  blankImageData,
+  width,
+  height,
+  true,
+  2
+);
 
 function renderTypographyIfNeeded() {
   if (typographyDirty) {
-    const t = state.typographyLayer;
-    const builder = TypographyBuilder.create(width, height)
-      .text(t.text)
-      .fontFamily(t.fontFamily)
-      .padding(t.padding)
-      .fillStyle(t.fillStyle)
-      .strokeStyle(t.strokeStyle, t.strokeWidth)
-      .background(t.backgroundColor)
-      .glow(t.glowColor, t.glowSize, t.shadowOffsetX, t.shadowOffsetY)
-      .blur(t.blurAmount)
-      .innerGlow(t.innerGlowColor, t.innerGlowBlur);
+    typographyLayer.enabled = state.typographyLayer.enabled;
+    if (typographyLayer.enabled) {
+      const t = state.typographyLayer;
+      const builder = TypographyBuilder.create(width, height)
+        .text(t.text)
+        .fontFamily(t.fontFamily)
+        .padding(t.padding)
+        .fillStyle(t.fillStyle)
+        .strokeStyle(t.strokeStyle, t.strokeWidth)
+        .background(t.backgroundColor)
+        .glow(t.glowColor, t.glowSize, t.shadowOffsetX, t.shadowOffsetY)
+        .blur(t.blurAmount)
+        .innerGlow(t.innerGlowColor, t.innerGlowBlur);
 
-    if (t.useGradient) {
-      builder.gradient(t.gradientColors);
-    }
-    if (t.fontSizeAuto) {
-      builder.autoFontSize(true);
-    } else {
-      builder.fontSize(t.fontSizeManual);
-    }
+      if (t.useGradient) {
+        builder.gradient(t.gradientColors);
+      }
+      if (t.fontSizeAuto) {
+        builder.autoFontSize(true);
+      } else {
+        builder.fontSize(t.fontSizeManual);
+      }
 
-    const typographyCanvas = builder.toCanvas();
-    typographyLayer.imageData = typographyCanvas
-      .getContext("2d")
-      .getImageData(0, 0, width, height);
+      const typographyCanvas = builder.toCanvas();
+      typographyLayer.imageData = typographyCanvas
+        .getContext("2d")
+        .getImageData(0, 0, width, height);
+    }
     typographyDirty = false;
   }
 }
@@ -433,18 +458,21 @@ function instantiateNoiseIfNeeded() {
     if (!noiseLayer) {
       noiseLayer = new NoiseAdapter(
         noise,
+        state.noiseLayer.enabled,
         state.noiseLayer.gain,
         state.noiseLayer.frequency,
         state.noiseLayer.noiseSpeed
       );
     } else {
+      noiseLayer.enabled = state.noiseLayer.enabled;
       noiseLayer.noise = noise;
       noiseLayer.gain = state.noiseLayer.gain;
       noiseLayer.frequency = state.noiseLayer.frequency;
       noiseLayer.noiseSpeed = state.noiseLayer.noiseSpeed;
     }
-    noiseLayer.setTime(state.t);
+    if (noiseLayer.enabled) noiseLayer.setTime(state.t);
   } else {
+    noiseLayer.enabled = state.noiseLayer.enabled;
     noiseLayer.gain = state.noiseLayer.gain;
     noiseLayer.frequency = state.noiseLayer.frequency;
     noiseLayer.noiseSpeed = state.noiseLayer.noiseSpeed;
@@ -454,6 +482,7 @@ instantiateNoiseIfNeeded();
 
 // Noise layer mask
 const maskLayer = new MaskDecoratorCircle(noiseLayer, {
+  enableMasking: state.maskLayer.enableMasking,
   radius: state.maskLayer.radius,
   fadeOutDuration: state.maskLayer.fadeOutDuration,
   autoFadeDuration: state.maskLayer.autoFadeDuration,
@@ -463,6 +492,7 @@ const maskLayer = new MaskDecoratorCircle(noiseLayer, {
   let isMouseDown = false;
 
   canvas.addEventListener("mousedown", (ev) => {
+    if (!maskLayer.enabled || !maskLayer.enableMasking) return;
     isMouseDown = true;
     const rect = canvas.getBoundingClientRect();
     const x = ((ev.clientX - rect.left) / rect.width) * width;
@@ -471,6 +501,7 @@ const maskLayer = new MaskDecoratorCircle(noiseLayer, {
   });
 
   canvas.addEventListener("mousemove", (ev) => {
+    if (!maskLayer.enabled || !maskLayer.enableMasking) return;
     if (!isMouseDown) return;
     const rect = canvas.getBoundingClientRect();
     const x = ((ev.clientX - rect.left) / rect.width) * width;
@@ -479,6 +510,7 @@ const maskLayer = new MaskDecoratorCircle(noiseLayer, {
   });
 
   canvas.addEventListener("mouseup", (ev) => {
+    if (!maskLayer.enabled || !maskLayer.enableMasking) return;
     if (!isMouseDown) return;
     isMouseDown = false;
     maskLayer.deactivate(state.t);
@@ -493,6 +525,7 @@ function update(now, dt) {
   renderTypographyIfNeeded();
   instantiateNoiseIfNeeded();
 
+  maskLayer.enableMasking = state.maskLayer.enableMasking;
   maskLayer.radius = state.maskLayer.radius;
   maskLayer.fadeOutDuration = state.maskLayer.fadeOutDuration;
   maskLayer.autoFadeDuration = state.maskLayer.autoFadeDuration;

@@ -2,9 +2,20 @@
  * Adapter for image data, conforming to the Layer API.
  * Samples pixel values from an image data array and returns them normalized to the range [0,1].
  *
+ * Participation is controlled by the `enabled` flag. If the layer is disabled,
+ * the LayerStack must not call `getValue`, `setTime`, or `advanceTime` on it.
+ * Calling `getValue` on a disabled layer will throw an exception.
+ *
  * @implements {Layer}
  */
 export class ImageDataAdapter {
+  /**
+   * Whether this layer is active in the stack.
+   * @type {boolean}
+   * @public
+   */
+  enabled = true;
+
   /**
    * The underlying ImageData object.
    * @type {ImageData}
@@ -38,12 +49,14 @@ export class ImageDataAdapter {
    * @param {ImageData} imageData - The image data.
    * @param {number} width - image width
    * @param {number} height - image height
+   * @param {boolean} [enabled=true] - Whether the layer is enabled.
    * @param {number} [channel=3] - The channel to sample: 0=red, 1=green, 2=blue, 3=alpha.
    */
-  constructor(imageData, width, height, channel = 3) {
+  constructor(imageData, width, height, enabled = true, channel = 3) {
     this.imageData = imageData;
     this.width = width;
     this.height = height;
+    this.enabled = enabled;
     this.channel = channel;
   }
 
@@ -54,6 +67,9 @@ export class ImageDataAdapter {
    * @returns {number} Normalized value [0,1].
    */
   getValue(x, y) {
+    if (!this.enabled) {
+      throw new Error("getValue() called on disabled layer");
+    }
     const xi = Math.floor(x);
     const yi = Math.floor(y);
     if (xi >= 0 && xi < this.width && yi >= 0 && yi < this.height) {
@@ -69,10 +85,16 @@ export class ImageDataAdapter {
   }
 
   setTime(t) {
-    // No time-based behavior, but required by Layer API.
+    if (!this.enabled) {
+      throw new Error("setTime() called on disabled layer");
+    }
+    // No-op
   }
 
   advanceTime(dt) {
-    // No time-based behavior, but required by Layer API.
+    if (!this.enabled) {
+      throw new Error("advanceTime() called on disabled layer");
+    }
+    // No-op
   }
 }
