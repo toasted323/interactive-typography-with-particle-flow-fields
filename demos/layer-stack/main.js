@@ -479,7 +479,14 @@ const stack = new LayerStack([typographyLayer, maskLayer]);
 
 // Main loop
 
-function update() {
+function update(now) {
+  maskLayer.radius = state.maskLayer.radius;
+  maskLayer.fadeOutDuration = state.maskLayer.fadeOutDuration;
+  maskLayer.autoFadeDuration = state.maskLayer.autoFadeDuration;
+
+  renderTypographyIfNeeded();
+  instantiateNoiseIfNeeded();
+
   if (state.animating) {
     if (state.useAdvanceTime) {
       stack.advanceTime(state.speed);
@@ -490,15 +497,10 @@ function update() {
     }
   }
 
-  maskLayer.radius = state.maskLayer.radius;
-  maskLayer.fadeOutDuration = state.maskLayer.fadeOutDuration;
-  maskLayer.autoFadeDuration = state.maskLayer.autoFadeDuration;
+  fpsChart.record(now);
 }
 
 function render() {
-  renderTypographyIfNeeded();
-  instantiateNoiseIfNeeded();
-
   const img = ctx.createImageData(width, height);
   let i = 0;
   for (let y = 0; y < height; y++) {
@@ -541,13 +543,13 @@ function render() {
     }
   }
   ctx.putImageData(img, 0, 0);
+
+  fpsChart.draw();
 }
 
 function loop(now = performance.now()) {
-  update();
+  update(now);
   render();
-  fpsChart.record(now);
-  fpsChart.draw();
   requestAnimationFrame(loop);
 }
 

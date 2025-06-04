@@ -165,7 +165,9 @@ function instantiateNoiseIfNeeded() {
   }
 }
 
-function update() {
+function update(now) {
+  instantiateNoiseIfNeeded();
+
   if (state.animating) {
     if (state.useAdvanceTime) {
       noise.advanceTime(state.speed * state.frequency);
@@ -175,6 +177,24 @@ function update() {
       noise.setTime(state.t * state.frequency);
     }
   }
+
+  let noiseValues = [];
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const value = noise.getValue(x * state.frequency, y * state.frequency);
+      noiseValues.push(value);
+    }
+  }
+
+  histogramChart.update(noiseValues);
+
+  const min = noiseValues.reduce((a, b) => Math.min(a, b), Infinity);
+  const max = noiseValues.reduce((a, b) => Math.max(a, b), -Infinity);
+  minMaxChart.record(min, max);
+
+  state.noiseValues = noiseValues;
+
+  fpsChart.record(now);
 }
 
 function renderGrid(
@@ -218,15 +238,12 @@ function renderPieChart(
 }
 
 function render() {
-  instantiateNoiseIfNeeded();
-
-  let noiseValues = [];
+  let noiseValues = state.noiseValues;
   const img = ctx.createImageData(width, height);
   let i = 0;
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      const value = noise.getValue(x * state.frequency, y * state.frequency);
-      noiseValues.push(value);
+      const value = noiseValues[y * width + x];
 
       let r, g, b;
       switch (state.colorMode) {
@@ -272,23 +289,15 @@ function render() {
     renderPieChart(ctx, width - 50, 50, 20, progress);
   }
 
-  histogramChart.update(noiseValues);
   histogramChart.draw();
-
-  const min = noiseValues.reduce((a, b) => Math.min(a, b), Infinity);
-  const max = noiseValues.reduce((a, b) => Math.max(a, b), -Infinity);
-
-  minMaxChart.record(min, max);
   minMaxChart.draw();
+  fpsChart.draw();
 }
 
 function loop(now = performance.now()) {
-  update();
+  update(now);
   render();
-  fpsChart.record(now);
-  fpsChart.draw();
   requestAnimationFrame(loop);
 }
 
-instantiateNoiseIfNeeded();
 loop();
