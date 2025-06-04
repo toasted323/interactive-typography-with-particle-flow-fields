@@ -57,7 +57,7 @@ const pane = new Pane({ container: document.getElementById("ui") });
 let updateNoiseFolderVisibility;
 {
   // Noise
-  const noiseTypeBinding = pane.addBinding(state, "noiseType", {
+  pane.addBinding(state, "noiseType", {
     options: {
       PerlinNoise2DTime: "PerlinNoise2DTime",
       FlowNoise2DTime: "FlowNoise2DTime",
