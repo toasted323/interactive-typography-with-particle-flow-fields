@@ -27,15 +27,24 @@ export class NoiseAdapter {
   frequency;
 
   /**
+   * Speed multiplier for noise time evolution.
+   * @type {number}
+   * @public
+   */
+  noiseSpeed;
+
+  /**
    * Create a new NoiseAdapter.
    * @param {Noise2DTime} noise - A concrete Noise2DTime instance.
    * @param {number} [gain=1] - Output multiplier.
    * @param {number} [frequency=1] - Noise frequency.
+   * @param {number} [noiseSpeed=1] - Noise temporal evolution speed.
    */
-  constructor(noise, gain = 1, frequency = 1) {
+  constructor(noise, gain = 1, frequency = 1, noiseSpeed = 1) {
     this.noise = noise;
     this.gain = gain;
     this.frequency = frequency;
+    this.noiseSpeed = noiseSpeed;
   }
 
   /**
@@ -46,7 +55,11 @@ export class NoiseAdapter {
    */
   getValue(x, y) {
     // Map output from [-1,1] to [0,1] and scale by gain
-    return this.gain * 0.5 * (this.noise.getValue(x * this.frequency, y * this.frequency) + 1);
+    return (
+      this.gain *
+      0.5 *
+      (this.noise.getValue(x * this.frequency, y * this.frequency) + 1)
+    );
   }
 
   /**
@@ -59,18 +72,18 @@ export class NoiseAdapter {
   }
 
   /**
-   * Set the current time for the underlying noise.
+   * Set the current time for the underlying noise, applying noiseSpeed and frequency.
    * @param {number} t - Time value.
    */
   setTime(t) {
-    this.noise.setTime(t * this.frequency);
+    this.noise.setTime(t * this.noiseSpeed * this.frequency);
   }
 
   /**
-   * Advance the current time for the underlying noise.
+   * Advance the current time for the underlying noise, applying noiseSpeed and frequency.
    * @param {number} dt - Time delta.
    */
   advanceTime(dt) {
-    this.noise.advanceTime(dt * this.frequency);
+    this.noise.advanceTime(dt * this.noiseSpeed * this.frequency);
   }
 }

@@ -32,11 +32,12 @@ function getDefaultState() {
     noiseType: "PerlinNoise2DTime",
 
     frequency: 0.05,
+    noiseSpeed: 20.0,
     showScaleVisualization: true,
 
     animating: true,
     t: 0,
-    speed: 0.5,
+    speed: 1.0,
     useAdvanceTime: false,
 
     colorMode: "grayscale",
@@ -95,14 +96,20 @@ let updateNoiseFolderVisibility;
 {
   // General params
   pane.addBinding(state, "frequency", { min: 0.001, max: 1, step: 0.001 });
+  pane.addBinding(state, "noiseSpeed", {
+    min: 0.1,
+    max: 1000,
+    step: 0.1,
+    label: "Noise Speed",
+  });
   pane.addBinding(state, "showScaleVisualization", {
     label: "Show Scale Visualization",
   });
 
   pane.addBinding(state, "speed", {
-    min: 0.001,
-    max: 2,
-    step: 0.001,
+    min: 0.1,
+    max: 20,
+    step: 0.1,
   });
   pane.addBinding(state, "useAdvanceTime", { label: "Use advanceTime()" });
 
@@ -165,16 +172,16 @@ function instantiateNoiseIfNeeded() {
   }
 }
 
-function update(now) {
+function update(now, dt) {
   instantiateNoiseIfNeeded();
 
   if (state.animating) {
     if (state.useAdvanceTime) {
-      noise.advanceTime(state.speed * state.frequency);
-      state.t += state.speed;
+      noise.advanceTime(dt * state.speed * state.noiseSpeed * state.frequency);
+      state.t += dt * state.speed;
     } else {
-      state.t += state.speed;
-      noise.setTime(state.t * state.frequency);
+      state.t += dt * state.speed;
+      noise.setTime(state.t * state.noiseSpeed * state.frequency);
     }
   }
 
@@ -284,7 +291,7 @@ function render() {
 
   if (state.showScaleVisualization) {
     renderGrid(ctx, width, height, state.frequency);
-    const period = 1 / state.frequency;
+    const period = 1 / (state.frequency * state.noiseSpeed);
     const progress = (state.t % period) / period;
     renderPieChart(ctx, width - 50, 50, 20, progress);
   }
@@ -294,8 +301,12 @@ function render() {
   fpsChart.draw();
 }
 
+let lastNow = performance.now();
+
 function loop(now = performance.now()) {
-  update(now);
+  const dt = (now - lastNow) / 1000;
+  lastNow = now;
+  update(now, dt);
   render();
   requestAnimationFrame(loop);
 }

@@ -25,6 +25,7 @@ const defaultNoiseLayerParams = {
   PerlinNoise2DTime: { seed: 0 },
   FlowNoise2DTime: { seed: 0, spinVariation: 0.2, N: 128 },
   frequency: 0.05,
+  noiseSpeed: 20.0,
   gain: 1,
 };
 
@@ -66,7 +67,7 @@ function getDefaultState() {
     maskLayer: {
       radius: 100,
       fadeOutDuration: 1.0,
-      autoFadeDuration: 0.2,
+      autoFadeDuration: 1.0,
     },
 
     // Noise layer
@@ -78,7 +79,7 @@ function getDefaultState() {
     // Main
     animating: true,
     t: 0,
-    speed: 0.5,
+    speed: 1.0,
     useAdvanceTime: false,
 
     colorMode: "grayscale",
@@ -171,11 +172,17 @@ let updateNoiseFolderVisibility;
     step: 1,
   });
 
-  // Frequency and gain
+  // Frequency, speed, and gain
   noiseLayerFolder.addBinding(state.noiseLayer, "frequency", {
     min: 0.001,
     max: 1,
     step: 0.001,
+  });
+  noiseLayerFolder.addBinding(state.noiseLayer, "noiseSpeed", {
+    min: 0,
+    max: 1000,
+    step: 0.1,
+    label: "Noise Speed",
   });
   noiseLayerFolder.addBinding(state.noiseLayer, "gain", {
     min: 0,
@@ -331,9 +338,9 @@ let typographyDirty = true;
 // General params
 {
   pane.addBinding(state, "speed", {
-    min: 0.001,
-    max: 2,
-    step: 0.001,
+    min: 0.1,
+    max: 20,
+    step: 0.1,
   });
   pane.addBinding(state, "useAdvanceTime", { label: "Use advanceTime()" });
 
@@ -427,17 +434,20 @@ function instantiateNoiseIfNeeded() {
       noiseLayer = new NoiseAdapter(
         noise,
         state.noiseLayer.gain,
-        state.noiseLayer.frequency
+        state.noiseLayer.frequency,
+        state.noiseLayer.noiseSpeed
       );
     } else {
       noiseLayer.noise = noise;
       noiseLayer.gain = state.noiseLayer.gain;
       noiseLayer.frequency = state.noiseLayer.frequency;
+      noiseLayer.noiseSpeed = state.noiseLayer.noiseSpeed;
     }
     noiseLayer.setTime(state.t);
   } else {
     noiseLayer.gain = state.noiseLayer.gain;
     noiseLayer.frequency = state.noiseLayer.frequency;
+    noiseLayer.noiseSpeed = state.noiseLayer.noiseSpeed;
   }
 }
 instantiateNoiseIfNeeded();
@@ -479,20 +489,20 @@ const stack = new LayerStack([typographyLayer, maskLayer]);
 
 // Main loop
 
-function update(now) {
+function update(now, dt) {
+  renderTypographyIfNeeded();
+  instantiateNoiseIfNeeded();
+
   maskLayer.radius = state.maskLayer.radius;
   maskLayer.fadeOutDuration = state.maskLayer.fadeOutDuration;
   maskLayer.autoFadeDuration = state.maskLayer.autoFadeDuration;
 
-  renderTypographyIfNeeded();
-  instantiateNoiseIfNeeded();
-
   if (state.animating) {
     if (state.useAdvanceTime) {
-      stack.advanceTime(state.speed);
-      state.t += state.speed;
+      stack.advanceTime(dt * state.speed);
+      state.t += dt * state.speed;
     } else {
-      state.t += state.speed;
+      state.t += dt * state.speed;
       stack.setTime(state.t);
     }
   }
@@ -547,8 +557,12 @@ function render() {
   fpsChart.draw();
 }
 
+let lastNow = performance.now();
+
 function loop(now = performance.now()) {
-  update(now);
+  const dt = (now - lastNow) / 1000;
+  lastNow = now;
+  update(now, dt);
   render();
   requestAnimationFrame(loop);
 }
