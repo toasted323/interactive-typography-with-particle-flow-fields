@@ -9,7 +9,14 @@ import { PerlinNoise2DTime } from "../../src/noise/PerlinNoise2DTime.js";
 import { FlowNoise2DTime } from "../../src/noise/FlowNoise2DTime.js";
 import { NoiseAdapter } from "../../src/layers/adapters/NoiseAdapter.js";
 
+import { MaskDecoratorCircle } from "../../src/layers/stack/MaskDecoratorCircle.js";
+
 import { LayerStack } from "../../src/layers/stack/LayerStack.js";
+
+const canvas = document.getElementById("demo-canvas");
+const ctx = canvas.getContext("2d");
+const width = canvas.width,
+  height = canvas.height;
 
 // --- State ---
 
@@ -55,6 +62,13 @@ const defaultTypographyLayerParams = {
 
 function getDefaultState() {
   return {
+    // Noise layer mask
+    maskLayer: {
+      radius: 100,
+      fadeOutDuration: 1.0,
+      autoFadeDuration: 0.2,
+    },
+
     // Noise layer
     noiseLayer: { ...defaultNoiseLayerParams },
 
@@ -81,6 +95,34 @@ const noiseClasses = {
 // --- UI setup ---
 
 const pane = new Pane({ container: document.getElementById("ui") });
+
+// Noise layer mask params
+{
+  const maskFolder = pane.addFolder({
+    title: "Noise Mask (Circle)",
+    expanded: true,
+  });
+
+  maskFolder.addBinding(state.maskLayer, "radius", {
+    min: 1,
+    max: Math.min(width, height) / 2,
+    step: 1,
+  });
+
+  maskFolder.addBinding(state.maskLayer, "fadeOutDuration", {
+    min: 0.01,
+    max: 10,
+    step: 0.01,
+    label: "Fade Out Duration (s)",
+  });
+
+  maskFolder.addBinding(state.maskLayer, "autoFadeDuration", {
+    min: 0.01,
+    max: 10,
+    step: 0.01,
+    label: "Auto Fade Delay (s)",
+  });
+}
 
 // Noise layer params
 let updateNoiseFolderVisibility;
@@ -325,12 +367,7 @@ let typographyDirty = true;
 
 const fpsChart = new FpsChart(document.getElementById("fps-canvas"));
 
-// --- Demo canvas and rendering ---
-
-const canvas = document.getElementById("demo-canvas");
-const ctx = canvas.getContext("2d");
-const width = canvas.width,
-  height = canvas.height;
+// --- Demo canvas updating and rendering ---
 
 // Typography layer
 const blankImageData = new ImageData(width, height);
@@ -405,7 +442,40 @@ function instantiateNoiseIfNeeded() {
 }
 instantiateNoiseIfNeeded();
 
-const stack = new LayerStack([typographyLayer, noiseLayer]);
+// Noise layer mask
+const maskLayer = new MaskDecoratorCircle(noiseLayer, {
+  radius: state.maskLayer.radius,
+  fadeOutDuration: state.maskLayer.fadeOutDuration,
+  autoFadeDuration: state.maskLayer.autoFadeDuration,
+});
+
+{
+  let isMouseDown = false;
+
+  canvas.addEventListener("mousedown", (ev) => {
+    isMouseDown = true;
+    const rect = canvas.getBoundingClientRect();
+    const x = ((ev.clientX - rect.left) / rect.width) * width;
+    const y = ((ev.clientY - rect.top) / rect.height) * height;
+    maskLayer.activate(x, y, state.t);
+  });
+
+  canvas.addEventListener("mousemove", (ev) => {
+    if (!isMouseDown) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = ((ev.clientX - rect.left) / rect.width) * width;
+    const y = ((ev.clientY - rect.top) / rect.height) * height;
+    maskLayer.update(x, y, state.t);
+  });
+
+  canvas.addEventListener("mouseup", (ev) => {
+    if (!isMouseDown) return;
+    isMouseDown = false;
+    maskLayer.deactivate(state.t);
+  });
+}
+
+const stack = new LayerStack([typographyLayer, maskLayer]);
 
 // Main loop
 
@@ -419,6 +489,10 @@ function update() {
       stack.setTime(state.t);
     }
   }
+
+  maskLayer.radius = state.maskLayer.radius;
+  maskLayer.fadeOutDuration = state.maskLayer.fadeOutDuration;
+  maskLayer.autoFadeDuration = state.maskLayer.autoFadeDuration;
 }
 
 function render() {
