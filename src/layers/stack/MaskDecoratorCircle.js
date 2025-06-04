@@ -3,6 +3,9 @@
  * The mask can be activated, updated, and deactivated (with fade-out).
  * If not updated for `autoFadeDuration`, it auto-deactivates.
  *
+ * Masking can be toggled independently via `enableMasking`.
+ *
+ * @implements {Layer}
  * @class
  */
 export class MaskDecoratorCircle {
@@ -11,6 +14,12 @@ export class MaskDecoratorCircle {
    * @type {Layer}
    */
   layer;
+
+  /**
+   * Whether masking is active. If false, this decorator passes through the layer value.
+   * @type {boolean}
+   */
+  enableMasking = true;
 
   /**
    * The radius of the circular mask.
@@ -48,6 +57,7 @@ export class MaskDecoratorCircle {
   /**
    * @param {Layer} layer - The layer to mask.
    * @param {object} opts - Mask options.
+   * @param {boolean} [opts.enableMasking=true] - Initial masking enablement.
    * @param {number} opts.centerX - Initial center X coordinate (optional).
    * @param {number} opts.centerY - Initial center Y coordinate (optional).
    * @param {number} opts.radius - Radius of the mask.
@@ -56,9 +66,23 @@ export class MaskDecoratorCircle {
    */
   constructor(layer, opts) {
     this.layer = layer;
+    this.enableMasking =
+      opts.enableMasking !== undefined ? opts.enableMasking : true;
     this.radius = opts.radius;
     this.fadeOutDuration = opts.fadeOutDuration;
     this.autoFadeDuration = opts.autoFadeDuration;
+  }
+
+  /**
+   * The enablement state.
+   * Delegates to the root layer's enabled property.
+   * @type {boolean}
+   */
+  get enabled() {
+    return this.layer.enabled;
+  }
+  set enabled(value) {
+    this.layer.enabled = value;
   }
 
   /**
@@ -67,6 +91,7 @@ export class MaskDecoratorCircle {
    * @param {number} centerY
    */
   activate(centerX, centerY) {
+    if (!this.enableMasking) return;
     this.#active = true;
     this.#fading = false;
 
@@ -85,6 +110,7 @@ export class MaskDecoratorCircle {
    * @param {number} centerY
    */
   update(centerX, centerY) {
+    if (!this.enableMasking) return;
     this.#centerX = centerX;
     this.#centerY = centerY;
     this.#lastUpdateTime = this.#t;
@@ -105,6 +131,7 @@ export class MaskDecoratorCircle {
    * Starts the fade-out phase at the current internal time.
    */
   deactivate() {
+    if (!this.enableMasking) return;
     if (this.#active && !this.#fading) {
       this.#fading = true;
       this.#fadeOutStartTime = this.#t;
@@ -120,6 +147,7 @@ export class MaskDecoratorCircle {
    * @returns {void}
    */
   #checkAutoFade() {
+    if (!this.enableMasking) return;
     if (
       this.#active &&
       !this.#fading &&
@@ -128,6 +156,16 @@ export class MaskDecoratorCircle {
     ) {
       this.deactivate(this.#t);
     }
+  }
+
+  /**
+   * The current time state of the layer.
+   * Delegates to the wrapped layer.
+   * @type {number}
+   * @readonly
+   */
+  get time() {
+    return this.layer.time;
   }
 
   /**
@@ -154,12 +192,18 @@ export class MaskDecoratorCircle {
 
   /**
    * Gets the masked value at a given position.
-   * Returns 0 if outside the circle, inactive, or after fade-out.
+   * If masking is disabled, returns the underlying layer's value directly.
+   * Otherwise, returns 0 if outside the circle, inactive, or after fade-out;
+   * inside, returns layer value * alpha.
    * @param {number} x - X coordinate.
    * @param {number} y - Y coordinate.
    * @returns {number} The masked value (0 if masked, else layer value * alpha).
    */
   getValue(x, y) {
+    if (!this.enableMasking) {
+      return this.layer.getValue(x, y);
+    }
+
     if (
       this.#t === null ||
       this.#centerX === null ||
