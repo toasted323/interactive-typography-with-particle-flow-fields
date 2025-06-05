@@ -22,16 +22,18 @@ const width = canvas.width,
 
 const defaultNoiseLayerParams = {
   enabled: true,
+  gain: 1,
+
   type: "PerlinNoise2DTime",
   PerlinNoise2DTime: { seed: 0 },
   FlowNoise2DTime: { seed: 0, spinVariation: 0.2, N: 128 },
   frequency: 0.05,
   noiseSpeed: 20.0,
-  gain: 1,
 };
 
 const defaultTypographyLayerParams = {
   enabled: true,
+  gain: 1,
 
   // Text
   text: "Layer Stack",
@@ -145,6 +147,12 @@ let updateNoiseFolderVisibility;
     label: "Layer Enabled",
   });
 
+  noiseLayerFolder.addBinding(state.noiseLayer, "gain", {
+    min: 0,
+    max: 2000,
+    step: 0.1,
+  });
+
   // Noise type selector
   noiseLayerFolder.addBinding(state.noiseLayer, "type", {
     options: {
@@ -184,7 +192,7 @@ let updateNoiseFolderVisibility;
     step: 1,
   });
 
-  // Frequency, speed, and gain
+  // Frequency, speed
   noiseLayerFolder.addBinding(state.noiseLayer, "frequency", {
     min: 0.001,
     max: 1,
@@ -195,11 +203,6 @@ let updateNoiseFolderVisibility;
     max: 1000,
     step: 0.1,
     label: "Noise Speed",
-  });
-  noiseLayerFolder.addBinding(state.noiseLayer, "gain", {
-    min: 0,
-    max: 10,
-    step: 0.1,
   });
 
   updateNoiseFolderVisibility = function () {
@@ -220,6 +223,12 @@ let typographyDirty = true;
 
   typographyLayerFolder.addBinding(state.typographyLayer, "enabled", {
     label: "Layer Enabled",
+  });
+
+  typographyLayerFolder.addBinding(state.typographyLayer, "gain", {
+    min: 0,
+    max: 2000,
+    step: 0.1,
   });
 
   // --- Text ---
@@ -399,6 +408,7 @@ const typographyLayer = new ImageDataAdapter(
   width,
   height,
   true,
+  1,
   2
 );
 
@@ -406,6 +416,8 @@ function renderTypographyIfNeeded() {
   if (typographyDirty) {
     typographyLayer.enabled = state.typographyLayer.enabled;
     if (typographyLayer.enabled) {
+      typographyLayer.gain = state.typographyLayer.gain;
+
       const t = state.typographyLayer;
       const builder = TypographyBuilder.create(width, height)
         .text(t.text)
@@ -464,8 +476,8 @@ function instantiateNoiseIfNeeded() {
         state.noiseLayer.noiseSpeed
       );
     } else {
-      noiseLayer.enabled = state.noiseLayer.enabled;
       noiseLayer.noise = noise;
+      noiseLayer.enabled = state.noiseLayer.enabled;
       noiseLayer.gain = state.noiseLayer.gain;
       noiseLayer.frequency = state.noiseLayer.frequency;
       noiseLayer.noiseSpeed = state.noiseLayer.noiseSpeed;

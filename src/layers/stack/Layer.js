@@ -29,6 +29,13 @@ export class Layer {
    */
   enabled = true;
 
+  /**
+   * Output multiplier for layer values.
+   * @type {number}
+   * @public
+   */
+  gain = 1.0;
+
   constructor() {
     if (new.target === Layer) {
       throw new Error(
@@ -38,11 +45,12 @@ export class Layer {
   }
 
   /**
-   * Returns the value at (x, y) for the current state.
+   * Returns the value at (x, y) for the current state, scaled by gain.
+   * Subclasses must multiply their output by `gain`.
    * Throws if the layer is disabled.
    * @param {number} x
    * @param {number} y
-   * @returns {number}
+   * @returns {number} The layer's value at (x, y), multiplied by `gain`.
    * @throws {Error} if the layer is disabled.
    * @abstract
    */
