@@ -1,3 +1,5 @@
+import { multiplyBlending } from "./blending.js";
+
 /**
  * A stack of layers that can be composited using a custom blending function.
  * Each layer must conform to the Layer API, which defines the required methods.
@@ -14,26 +16,8 @@ export class LayerStack {
    */
   constructor(layers = [], blendingFunc) {
     this.layers = layers;
-    this.blendingFunc = blendingFunc || this.defaultBlendingFunc;
+    this.blendingFunc = blendingFunc || multiplyBlending;
     this.time = 0;
-  }
-
-  /**
-   * Default multiplicative blending function.
-   * Skips disabled layers.
-   * @param {Array<Layer>} layers - Array of layers to blend.
-   * @param {number} x - X coordinate.
-   * @param {number} y - Y coordinate.
-   * @returns {number} Product of all enabled layer values at (x, y).
-   */
-  defaultBlendingFunc(layers, x, y) {
-    let value = 1;
-    for (const layer of layers) {
-      if (layer.enabled) {
-        value *= layer.getValue(x, y);
-      }
-    }
-    return value;
   }
 
   /**
