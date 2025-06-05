@@ -18,18 +18,18 @@ export class NoiseAdapter {
   enabled = true;
 
   /**
+   * Output multiplier for layer values.
+   * @type {number}
+   * @public
+   */
+  gain = 1.0;
+
+  /**
    * The wrapped Noise2DTime instance.
    * @type {Noise2DTime}
    * @public
    */
   noise;
-
-  /**
-   * Output multiplier for noise values.
-   * @type {number}
-   * @public
-   */
-  gain;
 
   /**
    * Frequency multiplier for noise coordinates.

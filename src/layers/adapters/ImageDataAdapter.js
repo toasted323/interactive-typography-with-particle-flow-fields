@@ -17,6 +17,13 @@ export class ImageDataAdapter {
   enabled = true;
 
   /**
+   * Output multiplier for layer values.
+   * @type {number}
+   * @public
+   */
+  gain = 1.0;
+
+  /**
    * The underlying ImageData object.
    * @type {ImageData}
    * @public
@@ -50,13 +57,15 @@ export class ImageDataAdapter {
    * @param {number} width - image width
    * @param {number} height - image height
    * @param {boolean} [enabled=true] - Whether the layer is enabled.
+   * @param {number} [gain=1] - Output multiplier for layer values.
    * @param {number} [channel=3] - The channel to sample: 0=red, 1=green, 2=blue, 3=alpha.
    */
-  constructor(imageData, width, height, enabled = true, channel = 3) {
+  constructor(imageData, width, height, enabled = true, gain = 1, channel = 3) {
     this.imageData = imageData;
     this.width = width;
     this.height = height;
     this.enabled = enabled;
+    this.gain = gain;
     this.channel = channel;
   }
 
@@ -74,7 +83,7 @@ export class ImageDataAdapter {
     const yi = Math.floor(y);
     if (xi >= 0 && xi < this.width && yi >= 0 && yi < this.height) {
       const idx = (yi * this.width + xi) * 4;
-      return this.imageData.data[idx + this.channel] / 255;
+      return (this.imageData.data[idx + this.channel] / 255) * this.gain;
     }
     return 0;
   }
