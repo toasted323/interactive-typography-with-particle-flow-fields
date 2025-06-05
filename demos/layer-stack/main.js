@@ -61,7 +61,7 @@ const defaultTypographyLayerParams = {
   innerGlowBlur: 0,
 
   // Background
-  backgroundColor: "#111111",
+  backgroundColor: "#000000",
 };
 
 function getDefaultState() {
