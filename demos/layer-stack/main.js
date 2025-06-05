@@ -12,6 +12,16 @@ import { NoiseAdapter } from "../../src/layers/adapters/NoiseAdapter.js";
 import { MaskDecoratorCircle } from "../../src/layers/stack/MaskDecoratorCircle.js";
 
 import { LayerStack } from "../../src/layers/stack/LayerStack.js";
+import {
+  additiveBlending,
+  subtractBlending,
+  multiplyBlending,
+  screenBlending,
+  overlayBlending,
+  maxBlending,
+  minBlending,
+  averageBlending,
+} from "../../src/layers/stack/blending.js";
 
 const canvas = document.getElementById("demo-canvas");
 const ctx = canvas.getContext("2d");
@@ -68,6 +78,8 @@ const defaultTypographyLayerParams = {
 
 function getDefaultState() {
   return {
+    blendingMode: "additive",
+
     // Noise layer mask
     maskLayer: {
       enableMasking: true,
@@ -94,6 +106,28 @@ function getDefaultState() {
 
 let state = getDefaultState();
 
+const blendingFunctions = {
+  additive: additiveBlending,
+  subtract: subtractBlending,
+  multiply: multiplyBlending,
+  screen: screenBlending,
+  overlay: overlayBlending,
+  max: maxBlending,
+  min: minBlending,
+  average: averageBlending,
+};
+
+const blendingOptions = {
+  Additive: "additive",
+  Subtract: "subtract",
+  Multiply: "multiply",
+  Screen: "screen",
+  Overlay: "overlay",
+  Max: "max",
+  Min: "min",
+  Average: "average",
+};
+
 const noiseClasses = {
   PerlinNoise2DTime,
   FlowNoise2DTime,
@@ -103,9 +137,19 @@ const noiseClasses = {
 
 const pane = new Pane({ container: document.getElementById("ui") });
 
+const stackFolder = pane.addFolder({
+  title: "Stack",
+  expanded: true,
+});
+
+stackFolder.addBinding(state, "blendingMode", {
+  label: "Blending Function",
+  options: blendingOptions,
+});
+
 // Noise layer mask params
 {
-  const maskFolder = pane.addFolder({
+  const maskFolder = stackFolder.addFolder({
     title: "Noise Mask (Circle)",
     expanded: true,
   });
@@ -138,7 +182,7 @@ const pane = new Pane({ container: document.getElementById("ui") });
 // Noise layer params
 let updateNoiseFolderVisibility;
 {
-  const noiseLayerFolder = pane.addFolder({
+  const noiseLayerFolder = stackFolder.addFolder({
     title: "Noise Layer Params",
     expanded: true,
   });
@@ -216,7 +260,7 @@ let updateNoiseFolderVisibility;
 // Typography layer params
 let typographyDirty = true;
 {
-  const typographyLayerFolder = pane.addFolder({
+  const typographyLayerFolder = stackFolder.addFolder({
     title: "Typography Layer Params",
     expanded: true,
   });
@@ -529,11 +573,16 @@ const maskLayer = new MaskDecoratorCircle(noiseLayer, {
   });
 }
 
-const stack = new LayerStack([typographyLayer, maskLayer]);
+const stack = new LayerStack(
+  [typographyLayer, maskLayer],
+  blendingFunctions[state.blendingMode]
+);
 
 // Main loop
 
 function update(now, dt) {
+  stack.blendingFunc = blendingFunctions[state.blendingMode];
+
   renderTypographyIfNeeded();
   instantiateNoiseIfNeeded();
 
