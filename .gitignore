@@ -4,6 +4,12 @@
 # build output
 /dist/
 /build/
+/public/LICENSE*
+/public/demos/*
+!/public/demos/
+!/public/demos/*/
+/public/demos/*/*
+!/public/demos/*/index.html
 
 # environment variables
 .env

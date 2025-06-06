@@ -1,6 +1,6 @@
-import { Pane } from "https://cdn.jsdelivr.net/npm/tweakpane@4.0.5/dist/tweakpane.min.js";
+import { Pane } from "tweakpane";
 
-import { TypographyBuilder } from "../../src/typography/TypographyBuilder.js";
+import { TypographyBuilder } from "$lib/typography/TypographyBuilder.js";
 
 // --- State ---
 

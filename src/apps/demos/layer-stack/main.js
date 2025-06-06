@@ -1,17 +1,17 @@
-import { Pane } from "https://cdn.jsdelivr.net/npm/tweakpane@4.0.5/dist/tweakpane.min.js";
+import { Pane } from "tweakpane";
 
-import { FpsChart } from "../../src/utils/FpsChart.js";
+import { FpsChart } from "$apps/shared/utils/FpsChart.js";
 
-import { TypographyBuilder } from "../../src/typography/TypographyBuilder.js";
-import { ImageDataAdapter } from "../../src/layers/adapters/ImageDataAdapter.js";
+import { TypographyBuilder } from "$lib/typography/TypographyBuilder.js";
+import { ImageDataAdapter } from "$lib/layers/adapters/ImageDataAdapter.js";
 
-import { PerlinNoise2DTime } from "../../src/noise/PerlinNoise2DTime.js";
-import { FlowNoise2DTime } from "../../src/noise/FlowNoise2DTime.js";
-import { NoiseAdapter } from "../../src/layers/adapters/NoiseAdapter.js";
+import { PerlinNoise2DTime } from "$lib/noise/PerlinNoise2DTime.js";
+import { FlowNoise2DTime } from "$lib/noise/FlowNoise2DTime.js";
+import { NoiseAdapter } from "$lib/layers/adapters/NoiseAdapter.js";
 
-import { MaskDecoratorCircle } from "../../src/layers/stack/MaskDecoratorCircle.js";
+import { MaskDecoratorCircle } from "$lib/layers/stack/MaskDecoratorCircle.js";
 
-import { LayerStack } from "../../src/layers/stack/LayerStack.js";
+import { LayerStack } from "$lib/layers/stack/LayerStack.js";
 import {
   additiveBlending,
   subtractBlending,
@@ -21,7 +21,7 @@ import {
   maxBlending,
   minBlending,
   averageBlending,
-} from "../../src/layers/stack/blending.js";
+} from "$lib/layers/stack/blending.js";
 
 const canvas = document.getElementById("demo-canvas");
 const ctx = canvas.getContext("2d");
