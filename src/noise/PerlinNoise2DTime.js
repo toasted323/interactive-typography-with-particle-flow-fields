@@ -55,7 +55,8 @@ const p = [
  *
  * The third dimension is interpreted as time, allowing smoothly animated 2D noise fields.
  *
- * Implements the Noise2D API: setTime(t), advanceTime(dt), getValue(x, y).
+ * Implements the Noise2D API: get time(), setTime(t), advanceTime(dt), getValue(x, y).
+ * - get time(): Readonly accessor for the current time parameter.
  * - setTime(t): Sets the current time slice (z axis) for subsequent noise queries.
  * - advanceTime(dt): Advances the internal time parameter by a delta, enabling incremental animation.
  * - getValue(x, y): Returns the noise value at (x, y, t), where t is the most recently set or advanced time.

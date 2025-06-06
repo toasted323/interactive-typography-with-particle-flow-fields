@@ -10,7 +10,8 @@
  * quintic smoothstep interpolation, and grid-gradient hashing. The evolution in time is achieved by rotating
  * the gradients, following the flow noise method.
  *
- * Implements the Noise2D API: setTime(t), advanceTime(dt), getValue(x, y).
+ * Implements the Noise2D API: get time(), setTime(t), advanceTime(dt), getValue(x, y).
+ * - get time(): Readonly accessor for the current time parameter.
  * - setTime(t): Sets the current time for the animated flow field (rotates the gradients to time t).
  * - advanceTime(dt): Efficiently advances the flow field by a time increment dt, incrementally rotating gradients.
  * - getValue(x, y): Returns the scalar noise value at (x, y, t), where t is the most recently set or advanced time.

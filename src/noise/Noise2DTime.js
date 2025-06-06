@@ -3,6 +3,7 @@
  *
  * Subclasses or duck-typed implementations must implement:
  * - getValue(x, y, frequency)
+ * - get time()
  * - setTime(t)
  * - advanceTime(dt)
  *
