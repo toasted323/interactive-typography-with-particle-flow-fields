@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "$core/*": ["src/*"]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "src-demos/**/*",
+    "src-main/**/*"
+  ]
+}

@@ -1,11 +1,11 @@
-import { Pane } from "https://cdn.jsdelivr.net/npm/tweakpane@4.0.5/dist/tweakpane.min.js";
+import { Pane } from "tweakpane";
 
-import { FpsChart } from "../../src/utils/FpsChart.js";
-import { HistogramChart } from "../../src/utils/HistogramChart.js";
-import { MinMaxChart } from "../../src/utils/MinMaxChart.js";
+import { FpsChart } from "$core/utils/FpsChart.js";
+import { HistogramChart } from "$core/utils/HistogramChart.js";
+import { MinMaxChart } from "$core/utils/MinMaxChart.js";
 
-import { PerlinNoise2DTime } from "../../src/noise/PerlinNoise2DTime.js";
-import { FlowNoise2DTime } from "../../src/noise/FlowNoise2DTime.js";
+import { PerlinNoise2DTime } from "$core/noise/PerlinNoise2DTime.js";
+import { FlowNoise2DTime } from "$core/noise/FlowNoise2DTime.js";
 
 // --- State ---
 
