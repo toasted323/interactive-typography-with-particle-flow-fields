@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "$lib/*": ["src/lib/*"],
+      "$apps/*": ["src/apps/*"]
+    }
+  },
+  "include": [
+    "src/**/*"
+  ]
+}

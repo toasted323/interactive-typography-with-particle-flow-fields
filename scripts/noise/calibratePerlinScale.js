@@ -1,5 +1,5 @@
-import { PerlinNoise2DTime } from "../../src/noise/PerlinNoise2DTime.js";
-import { FlowNoise2DTime } from "../../src/noise/FlowNoise2DTime.js";
+import { PerlinNoise2DTime } from "../../src/lib/noise/PerlinNoise2DTime.js";
+import { FlowNoise2DTime } from "../../src/lib/noise/FlowNoise2DTime.js";
 
 function findEmpiricalScale({
   NoiseClass,
