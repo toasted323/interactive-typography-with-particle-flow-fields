@@ -3,15 +3,15 @@ import { Pane } from "tweakpane";
 import { FpsChart } from "$apps/shared/utils/FpsChart.js";
 
 import { TypographyBuilder } from "$lib/typography/TypographyBuilder.js";
-import { ImageDataAdapter } from "$lib/layers/adapters/ImageDataAdapter.js";
+import { ImageDataAdapter } from "$lib/layers/ImageDataAdapter.js";
 
 import { PerlinNoise2DTime } from "$lib/noise/PerlinNoise2DTime.js";
 import { FlowNoise2DTime } from "$lib/noise/FlowNoise2DTime.js";
-import { NoiseAdapter } from "$lib/layers/adapters/NoiseAdapter.js";
+import { NoiseAdapter } from "$lib/layers/NoiseAdapter.js";
 
-import { MaskDecoratorCircle } from "$lib/layers/stack/MaskDecoratorCircle.js";
+import { MaskDecoratorCircle } from "$lib/layers/MaskDecoratorCircle.js";
 
-import { LayerStack } from "$lib/layers/stack/LayerStack.js";
+import { LayerStack } from "$lib/layers/LayerStack.js";
 import {
   additiveBlending,
   subtractBlending,
@@ -21,7 +21,7 @@ import {
   maxBlending,
   minBlending,
   averageBlending,
-} from "$lib/layers/stack/blending.js";
+} from "$lib/layers/blending.js";
 
 const canvas = document.getElementById("demo-canvas");
 const ctx = canvas.getContext("2d");
