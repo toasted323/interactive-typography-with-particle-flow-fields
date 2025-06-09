@@ -35,15 +35,87 @@ function createFlowParams() {
 }
 export const flowStore = createFlowParams();
 
+// --- FBM noise params ---
+function createFBMParams() {
+  const defaults = {
+    baseType: "PerlinNoise2DTime",
+    perlinBaseParams: {
+      seed: 0,
+    },
+    flowBaseParams: {
+      seed: 0,
+      spinVariation: 0.2,
+      N: 128,
+    },
+    octaves: 4,
+    persistence: 0.5,
+    lacunarity: 2.0,
+  };
+  const { subscribe, set, update } = writable({ ...defaults });
+  return {
+    subscribe,
+    set,
+    update,
+    setBaseType: (baseType) => update((obj) => ({ ...obj, baseType })),
+    setPerlinBaseParams: (perlinBaseParams) =>
+      update((obj) => ({ ...obj, perlinBaseParams })),
+    setFlowBaseParams: (flowBaseParams) =>
+      update((obj) => ({ ...obj, flowBaseParams })),
+    setOctaves: (octaves) => update((obj) => ({ ...obj, octaves })),
+    setPersistence: (persistence) => update((obj) => ({ ...obj, persistence })),
+    setLacunarity: (lacunarity) => update((obj) => ({ ...obj, lacunarity })),
+    reset: () => set({ ...defaults }),
+  };
+}
+export const fbmStore = createFBMParams();
+
+// --- Turbulence noise params ---
+function createTurbulenceParams() {
+  const defaults = {
+    baseType: "PerlinNoise2DTime",
+    perlinBaseParams: {
+      seed: 0,
+    },
+    flowBaseParams: {
+      seed: 0,
+      spinVariation: 0.2,
+      N: 128,
+    },
+    octaves: 4,
+    persistence: 0.5,
+    lacunarity: 2.0,
+  };
+  const { subscribe, set, update } = writable({ ...defaults });
+  return {
+    subscribe,
+    set,
+    update,
+    setBaseType: (baseType) => update((obj) => ({ ...obj, baseType })),
+    setPerlinBaseParams: (perlinBaseParams) =>
+      update((obj) => ({ ...obj, perlinBaseParams })),
+    setFlowBaseParams: (flowBaseParams) =>
+      update((obj) => ({ ...obj, flowBaseParams })),
+    setOctaves: (octaves) => update((obj) => ({ ...obj, octaves })),
+    setPersistence: (persistence) => update((obj) => ({ ...obj, persistence })),
+    setLacunarity: (lacunarity) => update((obj) => ({ ...obj, lacunarity })),
+    reset: () => set({ ...defaults }),
+  };
+}
+export const turbulenceStore = createTurbulenceParams();
+
 // --- Noise type ---
 export const noiseTypeToStore = {
   PerlinNoise2DTime: perlinStore,
   FlowNoise2DTime: flowStore,
+  FBMNoise2DTime: fbmStore,
+  TurbulenceNoise2DTime: turbulenceStore,
 };
 
 export const noiseTypeOptions = [
   { text: "PerlinNoise2DTime", value: "PerlinNoise2DTime" },
   { text: "FlowNoise2DTime", value: "FlowNoise2DTime" },
+  { text: "FBMNoise2DTime", value: "FBMNoise2DTime" },
+  { text: "TurbulenceNoise2DTime", value: "TurbulenceNoise2DTime" },
 ];
 
 function createNoiseTypeStore() {
@@ -85,6 +157,8 @@ function createDirtyFlags() {
   const defaults = {
     PerlinNoise2DTime: false,
     FlowNoise2DTime: false,
+    FBMNoise2DTime: false,
+    TurbulenceNoise2DTime: false,
     noiseType: false,
     frequency: false,
     noiseSpeed: false,
@@ -95,6 +169,12 @@ function createDirtyFlags() {
   );
   flowStore.subscribe(() =>
     update((flags) => ({ ...flags, FlowNoise2DTime: true }))
+  );
+  fbmStore.subscribe(() =>
+    update((flags) => ({ ...flags, FBMNoise2DTime: true }))
+  );
+  turbulenceStore.subscribe(() =>
+    update((flags) => ({ ...flags, TurbulenceNoise2DTime: true }))
   );
   noiseTypeStore.subscribe(() =>
     update((flags) => ({ ...flags, noiseType: true }))

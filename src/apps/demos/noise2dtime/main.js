@@ -2,6 +2,8 @@ import { get } from "svelte/store";
 
 import { PerlinNoise2DTime } from "$lib/noise/PerlinNoise2DTime.js";
 import { FlowNoise2DTime } from "$lib/noise/FlowNoise2DTime.js";
+import { FBMNoise2DTime } from "$lib/noise/FBMNoise2DTime.js";
+import { TurbulenceNoise2DTime } from "$lib/noise/TurbulenceNoise2DTime.js";
 
 import { FpsChart } from "$apps/shared/utils/FpsChart.js";
 import { HistogramChart } from "$apps/shared/utils/HistogramChart.js";
@@ -51,6 +53,8 @@ let noise = null;
 export const noiseClasses = {
   PerlinNoise2DTime,
   FlowNoise2DTime,
+  FBMNoise2DTime,
+  TurbulenceNoise2DTime,
 };
 
 function instantiateNoiseIfNeeded() {
@@ -62,9 +66,34 @@ function instantiateNoiseIfNeeded() {
   const flags = get(noiseDirtyFlagsStore);
   if (flags[noiseType] || flags.noiseType) {
     let instance;
+    if (
+      noiseType === "FBMNoise2DTime" ||
+      noiseType === "TurbulenceNoise2DTime"
+    ) {
+      const baseType = params.baseType;
+      const baseParams =
+        baseType === "PerlinNoise2DTime"
+          ? params.perlinBaseParams
+          : params.flowBaseParams;
 
-    const NoiseClass = noiseClasses[noiseType];
-    instance = new NoiseClass(params);
+      const BaseNoiseClass = noiseClasses[baseType];
+      if (!BaseNoiseClass)
+        throw new Error("Unknown base noise type: " + baseType);
+
+      const baseNoise = new BaseNoiseClass(baseParams);
+
+      const octaveParams = {
+        octaves: params.octaves,
+        persistence: params.persistence,
+        lacunarity: params.lacunarity,
+      };
+
+      const OctaveNoiseClass = noiseClasses[noiseType];
+      instance = new OctaveNoiseClass(baseNoise, octaveParams);
+    } else {
+      const NoiseClass = noiseClasses[noiseType];
+      instance = new NoiseClass(params);
+    }
 
     instance.setTime(state.t * get(noiseSpeedStore) * get(frequencyStore));
 
