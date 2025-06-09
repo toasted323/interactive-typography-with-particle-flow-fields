@@ -1,7 +1,9 @@
+import svelte from "rollup-plugin-svelte";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 import terser from "@rollup/plugin-terser";
 import commonjs from "@rollup/plugin-commonjs";
 import alias from "@rollup/plugin-alias";
+import css from "rollup-plugin-css-only";
 import path from "path";
 
 const production = !process.env.ROLLUP_WATCH;
@@ -10,6 +12,12 @@ const aliasEntries = [
   { find: "$lib", replacement: path.resolve(__dirname, "src/lib") },
   { find: "$apps", replacement: path.resolve(__dirname, "src/apps") },
 ];
+
+const svelteOptions = {
+  compilerOptions: {
+    dev: !production,
+  },
+};
 
 export default [
   {
@@ -22,7 +30,13 @@ export default [
     },
     plugins: [
       alias({ entries: aliasEntries }),
-      nodeResolve({ browser: true }),
+      svelte(svelteOptions),
+      css({ output: "bundle.css" }),
+      nodeResolve({
+        browser: true,
+        dedupe: ["svelte"],
+        exportConditions: ["svelte"],
+      }),
       commonjs(),
       production && terser(),
     ],

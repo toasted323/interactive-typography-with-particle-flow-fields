@@ -1,143 +1,30 @@
-import { Pane } from "tweakpane";
+import { get } from "svelte/store";
+
+import { PerlinNoise2DTime } from "$lib/noise/PerlinNoise2DTime.js";
+import { FlowNoise2DTime } from "$lib/noise/FlowNoise2DTime.js";
 
 import { FpsChart } from "$apps/shared/utils/FpsChart.js";
 import { HistogramChart } from "$apps/shared/utils/HistogramChart.js";
 import { MinMaxChart } from "$apps/shared/utils/MinMaxChart.js";
 
-import { PerlinNoise2DTime } from "$lib/noise/PerlinNoise2DTime.js";
-import { FlowNoise2DTime } from "$lib/noise/FlowNoise2DTime.js";
+import {
+  noiseTypeStore,
+  noiseTypeToStore,
+  frequencyStore,
+  noiseSpeedStore,
+  noiseDirtyFlagsStore,
+} from "./stores/noise.js";
 
-// --- State ---
+import { simulationStore } from "./stores/simulation.js";
+import { COLOR_MODE, uiStore } from "./stores/ui.js";
 
-const baseNoiseParamDefs = {
-  PerlinNoise2DTime: [
-    { key: "seed", options: { step: 1, min: 0, max: 4294967295 } },
-  ],
-  FlowNoise2DTime: [
-    { key: "seed", options: { step: 1, min: 0, max: 4294967295 } },
-    { key: "spinVariation", options: { min: 0, max: 1, step: 0.01 } },
-    { key: "N", options: { min: 1, max: 512, step: 1 } },
-  ],
-};
+import Controls from "./Controls.svelte";
 
-const defaultBaseParams = {
-  PerlinNoise2DTime: { seed: 0 },
-  FlowNoise2DTime: { seed: 0, spinVariation: 0.2, N: 128 },
-};
+// --- Controls ---
 
-function getDefaultState() {
-  return {
-    PerlinNoise2DTime: { ...defaultBaseParams.PerlinNoise2DTime },
-    FlowNoise2DTime: { ...defaultBaseParams.FlowNoise2DTime },
-    noiseType: "PerlinNoise2DTime",
-
-    frequency: 0.05,
-    noiseSpeed: 20.0,
-    showScaleVisualization: true,
-
-    animating: true,
-    t: 0,
-    speed: 1.0,
-    useAdvanceTime: false,
-
-    colorMode: "grayscale",
-  };
-}
-
-let state = getDefaultState();
-
-const noiseClasses = {
-  PerlinNoise2DTime: PerlinNoise2DTime,
-  FlowNoise2DTime: FlowNoise2DTime,
-};
-
-// --- UI setup ---
-
-const pane = new Pane({ container: document.getElementById("ui") });
-
-let updateNoiseFolderVisibility;
-{
-  // Noise
-  pane.addBinding(state, "noiseType", {
-    options: {
-      PerlinNoise2DTime: "PerlinNoise2DTime",
-      FlowNoise2DTime: "FlowNoise2DTime",
-    },
-  });
-
-  const noiseParamFolders = {};
-
-  // Perlin
-  const perlinFolder = pane.addFolder({ title: "PerlinNoise2DTime Params" });
-  perlinFolder.addBinding(
-    state.PerlinNoise2DTime,
-    "seed",
-    baseNoiseParamDefs.PerlinNoise2DTime[0].options
-  );
-  noiseParamFolders.PerlinNoise2DTime = perlinFolder;
-
-  // Flow
-  const flowFolder = pane.addFolder({ title: "FlowNoise2DTime Params" });
-  for (const def of baseNoiseParamDefs.FlowNoise2DTime) {
-    flowFolder.addBinding(state.FlowNoise2DTime, def.key, def.options);
-  }
-  noiseParamFolders.FlowNoise2DTime = flowFolder;
-
-  updateNoiseFolderVisibility = function () {
-    for (const key in noiseParamFolders) {
-      noiseParamFolders[key].hidden = key !== state.noiseType;
-    }
-  };
-
-  updateNoiseFolderVisibility();
-  pane.on("change", () => setTimeout(updateNoiseFolderVisibility, 0));
-}
-
-{
-  // General params
-  pane.addBinding(state, "frequency", { min: 0.001, max: 1, step: 0.001 });
-  pane.addBinding(state, "noiseSpeed", {
-    min: 0.1,
-    max: 1000,
-    step: 0.1,
-    label: "Noise Speed",
-  });
-  pane.addBinding(state, "showScaleVisualization", {
-    label: "Show Scale Visualization",
-  });
-
-  pane.addBinding(state, "speed", {
-    min: 0.1,
-    max: 20,
-    step: 0.1,
-  });
-  pane.addBinding(state, "useAdvanceTime", { label: "Use advanceTime()" });
-
-  pane.addBinding(state, "colorMode", {
-    label: "Color Mode",
-    options: {
-      Grayscale: "grayscale",
-      "Height Bands": "heightbands",
-      Geographical: "geographical",
-    },
-  });
-}
-
-{
-  // Actions
-  const actions = pane.addFolder({ title: "Actions", expanded: true });
-  actions.addButton({ title: "Pause" }).on("click", () => {
-    state.animating = false;
-  });
-  actions.addButton({ title: "Resume" }).on("click", () => {
-    state.animating = true;
-  });
-  const initialState = pane.exportState();
-  actions.addButton({ title: "Reset to Defaults" }).on("click", () => {
-    pane.importState(initialState);
-    setTimeout(updateNoiseFolderVisibility, 0);
-  });
-}
+const controls = new Controls({
+  target: document.getElementById("ui"),
+});
 
 // --- Charts ---
 
@@ -154,41 +41,66 @@ const ctx = canvas.getContext("2d");
 const width = canvas.width,
   height = canvas.height;
 
+let currentNoiseFlags = {};
+noiseDirtyFlagsStore.subscribe((flags) => {
+  currentNoiseFlags = flags;
+});
+
 let noise = null;
-let lastNoiseType = null;
-let lastNoiseParams = {};
+
+export const noiseClasses = {
+  PerlinNoise2DTime,
+  FlowNoise2DTime,
+};
 
 function instantiateNoiseIfNeeded() {
-  const noiseType = state.noiseType;
-  const params = { ...state[noiseType] };
-  const paramsChanged =
-    JSON.stringify(params) !== JSON.stringify(lastNoiseParams);
-  if (!noise || noiseType !== lastNoiseType || paramsChanged) {
+  const noiseType = get(noiseTypeStore);
+  const paramsStore = noiseTypeToStore[noiseType];
+  if (!paramsStore) throw new Error("Unknown noise type: " + noiseType);
+
+  const params = get(paramsStore);
+  const flags = get(noiseDirtyFlagsStore);
+  if (flags[noiseType] || flags.noiseType) {
+    let instance;
+
     const NoiseClass = noiseClasses[noiseType];
-    noise = new NoiseClass(params);
-    lastNoiseType = noiseType;
-    lastNoiseParams = params;
-    noise.setTime(state.t * state.frequency);
+    instance = new NoiseClass(params);
+
+    instance.setTime(state.t * get(noiseSpeedStore) * get(frequencyStore));
+
+    noise = instance;
+    noiseDirtyFlagsStore.clear(noiseType);
+    noiseDirtyFlagsStore.clear("noiseType");
   }
 }
+
+const state = {
+  t: 0,
+  noiseValues: [],
+};
 
 function update(now, dt) {
   instantiateNoiseIfNeeded();
 
-  if (state.animating) {
-    if (state.useAdvanceTime) {
-      noise.advanceTime(dt * state.speed * state.noiseSpeed * state.frequency);
-      state.t += dt * state.speed;
+  const { animating, speed, useAdvanceTime } = get(simulationStore);
+  const frequency = get(frequencyStore);
+  const noiseSpeed = get(noiseSpeedStore);
+
+  if (animating) {
+    const newT = state.t + dt * speed;
+    state.t = newT;
+
+    if (useAdvanceTime) {
+      noise.advanceTime(dt * speed * noiseSpeed * frequency);
     } else {
-      state.t += dt * state.speed;
-      noise.setTime(state.t * state.noiseSpeed * state.frequency);
+      noise.setTime(newT * noiseSpeed * frequency);
     }
   }
 
   let noiseValues = [];
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      const value = noise.getValue(x * state.frequency, y * state.frequency);
+      const value = noise.getValue(x * frequency, y * frequency);
       noiseValues.push(value);
     }
   }
@@ -245,7 +157,11 @@ function renderPieChart(
 }
 
 function render() {
-  let noiseValues = state.noiseValues;
+  const noiseValues = state.noiseValues;
+  const frequency = get(frequencyStore);
+  const noiseSpeed = get(noiseSpeedStore);
+  const { colorMode, showScaleVisualization } = get(uiStore);
+
   const img = ctx.createImageData(width, height);
   let i = 0;
   for (let y = 0; y < height; y++) {
@@ -253,15 +169,15 @@ function render() {
       const value = noiseValues[y * width + x];
 
       let r, g, b;
-      switch (state.colorMode) {
-        case "heightbands": {
+      switch (colorMode) {
+        case COLOR_MODE.HEIGHT_BANDS: {
           const bands = 12;
           const bandIndex = Math.floor(((value + 1) / 2) * bands);
           const isBlack = bandIndex % 2 === 0;
           r = g = b = isBlack ? 0 : 255;
           break;
         }
-        case "geographical": {
+        case COLOR_MODE.GEOGRAPHICAL: {
           if (value >= 0) {
             r = 0;
             g = Math.floor(127.5 + 127.5 * value);
@@ -273,7 +189,7 @@ function render() {
           }
           break;
         }
-        case "grayscale":
+        case COLOR_MODE.GRAYSCALE:
         default: {
           const c = Math.floor(127.5 * (value + 1));
           r = g = b = c;
@@ -289,9 +205,9 @@ function render() {
   }
   ctx.putImageData(img, 0, 0);
 
-  if (state.showScaleVisualization) {
-    renderGrid(ctx, width, height, state.frequency);
-    const period = 1 / (state.frequency * state.noiseSpeed);
+  if (showScaleVisualization) {
+    renderGrid(ctx, width, height, frequency);
+    const period = 1 / (frequency * noiseSpeed);
     const progress = (state.t % period) / period;
     renderPieChart(ctx, width - 50, 50, 20, progress);
   }
