@@ -29,10 +29,14 @@
         "eslint": "^8.0.0",
         "rollup": "^2.79.2",
         "rollup-plugin-copy": "^3.5.0",
-        "serve": "^14.2.0"
+        "rollup-plugin-css-only": "^4.5.2",
+        "rollup-plugin-svelte": "^7.2.2",
+        "serve": "^14.2.0",
+        "svelte": "^4.2.20"
     },
     "dependencies": {
         "@material/material-color-utilities": "^0.3.0",
+        "svelte-tweakpane-ui": "^1.5.8",
         "tweakpane": "^4.0.5"
     },
     "private": true
