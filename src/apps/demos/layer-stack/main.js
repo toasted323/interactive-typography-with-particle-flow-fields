@@ -1,17 +1,16 @@
-import { Pane } from "tweakpane";
-
-import { FpsChart } from "$apps/shared/utils/FpsChart.js";
+import { get } from "svelte/store";
 
 import { TypographyBuilder } from "$lib/typography/TypographyBuilder.js";
 import { ImageDataAdapter } from "$lib/layers/ImageDataAdapter.js";
 
 import { PerlinNoise2DTime } from "$lib/noise/PerlinNoise2DTime.js";
 import { FlowNoise2DTime } from "$lib/noise/FlowNoise2DTime.js";
+import { FBMNoise2DTime } from "$lib/noise/FBMNoise2DTime.js";
+import { TurbulenceNoise2DTime } from "$lib/noise/TurbulenceNoise2DTime.js";
 import { NoiseAdapter } from "$lib/layers/NoiseAdapter.js";
 
-import { MaskDecoratorCircle } from "$lib/layers/MaskDecoratorCircle.js";
-
 import { LayerStack } from "$lib/layers/LayerStack.js";
+import { MaskDecoratorCircle } from "$lib/layers/MaskDecoratorCircle.js";
 import {
   additiveBlending,
   subtractBlending,
@@ -23,427 +22,47 @@ import {
   averageBlending,
 } from "$lib/layers/blending.js";
 
-const canvas = document.getElementById("demo-canvas");
-const ctx = canvas.getContext("2d");
-const width = canvas.width,
-  height = canvas.height;
+import { FpsChart } from "$apps/shared/utils/FpsChart.js";
 
-// --- State ---
+import { layerStackStore } from "./stores/layerStack.js";
+import { maskLayerStore } from "./stores/maskLayer.js";
+import {
+  noiseLayerStore,
+  noiseTypeStore,
+  noiseTypeToStore,
+  frequencyStore,
+  noiseSpeedStore,
+  noiseDirtyFlagsStore,
+} from "./stores/noiseLayer.js";
+import {
+  typographyLayerStore,
+  typographyStore,
+} from "./stores/typographyLayer.js";
+import { simulationStore } from "./stores/simulation.js";
+import { COLOR_MODE, uiStore } from "./stores/ui.js";
 
-const defaultNoiseLayerParams = {
-  enabled: true,
-  gain: 1,
+import Controls from "./Controls.svelte";
 
-  type: "PerlinNoise2DTime",
-  PerlinNoise2DTime: { seed: 0 },
-  FlowNoise2DTime: { seed: 0, spinVariation: 0.2, N: 128 },
-  frequency: 0.05,
-  noiseSpeed: 20.0,
-};
+// --- Controls ---
 
-const defaultTypographyLayerParams = {
-  enabled: true,
-  gain: 1,
-
-  // Text
-  text: "Layer Stack",
-  fontFamily: "Arial",
-  fontSizeAuto: true,
-  fontSizeManual: 48,
-  padding: 60,
-
-  // Fill & stroke
-  fillStyle: "#0000ff",
-  strokeStyle: "#000099",
-  strokeWidth: 3,
-  useGradient: false,
-  gradientColors: ["#000066", "#0000ff", "#000066"],
-
-  // Glow & shadow
-  glowColor: "#0000cc",
-  glowSize: 10,
-  shadowOffsetX: 0,
-  shadowOffsetY: 0,
-
-  // Blur
-  blurAmount: 3,
-
-  // Inner glow
-  innerGlowColor: "#000044",
-  innerGlowBlur: 0,
-
-  // Background
-  backgroundColor: "#000000",
-};
-
-function getDefaultState() {
-  return {
-    blendingMode: "additive",
-
-    // Noise layer mask
-    maskLayer: {
-      enableMasking: true,
-      radius: 100,
-      fadeOutDuration: 1.0,
-      autoFadeDuration: 1.0,
-    },
-
-    // Noise layer
-    noiseLayer: { ...defaultNoiseLayerParams },
-
-    // Typography layer
-    typographyLayer: { ...defaultTypographyLayerParams },
-
-    // Main
-    animating: true,
-    t: 0,
-    speed: 1.0,
-    useAdvanceTime: false,
-
-    colorMode: "grayscale",
-  };
-}
-
-let state = getDefaultState();
-
-const blendingFunctions = {
-  additive: additiveBlending,
-  subtract: subtractBlending,
-  multiply: multiplyBlending,
-  screen: screenBlending,
-  overlay: overlayBlending,
-  max: maxBlending,
-  min: minBlending,
-  average: averageBlending,
-};
-
-const blendingOptions = {
-  Additive: "additive",
-  Subtract: "subtract",
-  Multiply: "multiply",
-  Screen: "screen",
-  Overlay: "overlay",
-  Max: "max",
-  Min: "min",
-  Average: "average",
-};
-
-const noiseClasses = {
-  PerlinNoise2DTime,
-  FlowNoise2DTime,
-};
-
-// --- UI setup ---
-
-const pane = new Pane({ container: document.getElementById("ui") });
-
-const stackFolder = pane.addFolder({
-  title: "Stack",
-  expanded: true,
+const controls = new Controls({
+  target: document.getElementById("ui"),
 });
-
-stackFolder.addBinding(state, "blendingMode", {
-  label: "Blending Function",
-  options: blendingOptions,
-});
-
-// Noise layer mask params
-{
-  const maskFolder = stackFolder.addFolder({
-    title: "Noise Mask (Circle)",
-    expanded: true,
-  });
-
-  maskFolder.addBinding(state.maskLayer, "enableMasking", {
-    label: "Masking Enabled",
-  });
-
-  maskFolder.addBinding(state.maskLayer, "radius", {
-    min: 1,
-    max: Math.min(width, height) / 2,
-    step: 1,
-  });
-
-  maskFolder.addBinding(state.maskLayer, "fadeOutDuration", {
-    min: 0.01,
-    max: 10,
-    step: 0.01,
-    label: "Fade Out Duration (s)",
-  });
-
-  maskFolder.addBinding(state.maskLayer, "autoFadeDuration", {
-    min: 0.01,
-    max: 10,
-    step: 0.01,
-    label: "Auto Fade Delay (s)",
-  });
-}
-
-// Noise layer params
-let updateNoiseFolderVisibility;
-{
-  const noiseLayerFolder = stackFolder.addFolder({
-    title: "Noise Layer Params",
-    expanded: true,
-  });
-
-  noiseLayerFolder.addBinding(state.noiseLayer, "enabled", {
-    label: "Layer Enabled",
-  });
-
-  noiseLayerFolder.addBinding(state.noiseLayer, "gain", {
-    min: 0,
-    max: 2000,
-    step: 0.1,
-  });
-
-  // Noise type selector
-  noiseLayerFolder.addBinding(state.noiseLayer, "type", {
-    options: {
-      PerlinNoise2DTime: "PerlinNoise2DTime",
-      FlowNoise2DTime: "FlowNoise2DTime",
-    },
-  });
-
-  // Noise instance params, grouped and shown/hidden as appropriate
-  const perlinFolder = noiseLayerFolder.addFolder({
-    title: "PerlinNoise2DTime Params",
-    expanded: false,
-  });
-  perlinFolder.addBinding(state.noiseLayer.PerlinNoise2DTime, "seed", {
-    min: 0,
-    max: 4294967295,
-    step: 1,
-  });
-
-  const flowFolder = noiseLayerFolder.addFolder({
-    title: "FlowNoise2DTime Params",
-    expanded: false,
-  });
-  flowFolder.addBinding(state.noiseLayer.FlowNoise2DTime, "seed", {
-    min: 0,
-    max: 4294967295,
-    step: 1,
-  });
-  flowFolder.addBinding(state.noiseLayer.FlowNoise2DTime, "spinVariation", {
-    min: 0,
-    max: 1,
-    step: 0.01,
-  });
-  flowFolder.addBinding(state.noiseLayer.FlowNoise2DTime, "N", {
-    min: 1,
-    max: 512,
-    step: 1,
-  });
-
-  // Frequency, speed
-  noiseLayerFolder.addBinding(state.noiseLayer, "frequency", {
-    min: 0.001,
-    max: 1,
-    step: 0.001,
-  });
-  noiseLayerFolder.addBinding(state.noiseLayer, "noiseSpeed", {
-    min: 0,
-    max: 1000,
-    step: 0.1,
-    label: "Noise Speed",
-  });
-
-  updateNoiseFolderVisibility = function () {
-    perlinFolder.hidden = state.noiseLayer.type !== "PerlinNoise2DTime";
-    flowFolder.hidden = state.noiseLayer.type !== "FlowNoise2DTime";
-  };
-  updateNoiseFolderVisibility();
-  noiseLayerFolder.on("change", updateNoiseFolderVisibility);
-}
-
-// Typography layer params
-let typographyDirty = true;
-{
-  const typographyLayerFolder = stackFolder.addFolder({
-    title: "Typography Layer Params",
-    expanded: true,
-  });
-
-  typographyLayerFolder.addBinding(state.typographyLayer, "enabled", {
-    label: "Layer Enabled",
-  });
-
-  typographyLayerFolder.addBinding(state.typographyLayer, "gain", {
-    min: 0,
-    max: 2000,
-    step: 0.1,
-  });
-
-  // --- Text ---
-  const textFolder = typographyLayerFolder.addFolder({
-    title: "Text",
-    expanded: false,
-  });
-  textFolder.addBinding(state.typographyLayer, "text");
-  textFolder.addBinding(state.typographyLayer, "fontFamily", {
-    options: {
-      Arial: "Arial",
-      Verdana: "Verdana",
-      "Times New Roman": "Times New Roman",
-    },
-  });
-  textFolder.addBinding(state.typographyLayer, "fontSizeAuto", {
-    label: "Auto Font Size",
-  });
-  const paddingBinding = textFolder.addBinding(
-    state.typographyLayer,
-    "padding",
-    {
-      min: 0,
-      max: 200,
-      step: 1,
-    }
-  );
-  const manualFontSizeBinding = textFolder.addBinding(
-    state.typographyLayer,
-    "fontSizeManual",
-    { min: 8, max: 200, step: 1, label: "Manual Font Size" }
-  );
-
-  // --- Fill & Stroke ---
-  const fillStrokeFolder = typographyLayerFolder.addFolder({
-    title: "Fill & Stroke",
-    expanded: false,
-  });
-  fillStrokeFolder.addBinding(state.typographyLayer, "fillStyle", {
-    view: "color",
-  });
-  fillStrokeFolder.addBinding(state.typographyLayer, "strokeStyle", {
-    view: "color",
-  });
-  fillStrokeFolder.addBinding(state.typographyLayer, "strokeWidth", {
-    min: 0,
-    max: 10,
-    step: 1,
-  });
-  fillStrokeFolder.addBinding(state.typographyLayer, "useGradient", {
-    label: "Use Gradient Fill",
-  });
-  fillStrokeFolder.addBinding(state.typographyLayer.gradientColors, "0", {
-    label: "Gradient Color 1",
-    view: "color",
-  });
-  fillStrokeFolder.addBinding(state.typographyLayer.gradientColors, "1", {
-    label: "Gradient Color 2",
-    view: "color",
-  });
-  fillStrokeFolder.addBinding(state.typographyLayer.gradientColors, "2", {
-    label: "Gradient Color 3",
-    view: "color",
-  });
-
-  // --- Glow & Shadow ---
-  const glowFolder = typographyLayerFolder.addFolder({
-    title: "Glow & Shadow",
-    expanded: false,
-  });
-  glowFolder.addBinding(state.typographyLayer, "glowColor", { view: "color" });
-  glowFolder.addBinding(state.typographyLayer, "glowSize", {
-    min: 0,
-    max: 100,
-    step: 1,
-  });
-  glowFolder.addBinding(state.typographyLayer, "shadowOffsetX", {
-    min: -50,
-    max: 50,
-    step: 1,
-  });
-  glowFolder.addBinding(state.typographyLayer, "shadowOffsetY", {
-    min: -50,
-    max: 50,
-    step: 1,
-  });
-
-  // --- Blur ---
-  const blurFolder = typographyLayerFolder.addFolder({
-    title: "Blur",
-    expanded: false,
-  });
-  blurFolder.addBinding(state.typographyLayer, "blurAmount", {
-    min: 0,
-    max: 50,
-    step: 1,
-  });
-
-  // --- Inner Glow ---
-  const innerGlowFolder = typographyLayerFolder.addFolder({
-    title: "Inner Glow",
-    expanded: false,
-  });
-  innerGlowFolder.addBinding(state.typographyLayer, "innerGlowColor", {
-    view: "color",
-  });
-  innerGlowFolder.addBinding(state.typographyLayer, "innerGlowBlur", {
-    min: 0,
-    max: 50,
-    step: 1,
-  });
-
-  // --- Background ---
-  const bgFolder = typographyLayerFolder.addFolder({
-    title: "Background",
-    expanded: false,
-  });
-  bgFolder.addBinding(state.typographyLayer, "backgroundColor", {
-    view: "color",
-  });
-
-  typographyLayerFolder.on("change", (ev) => {
-    paddingBinding.disabled = !state.typographyLayer.fontSizeAuto;
-    manualFontSizeBinding.disabled = state.typographyLayer.fontSizeAuto;
-    typographyDirty = true;
-  });
-
-  paddingBinding.disabled = !state.typographyLayer.fontSizeAuto;
-  manualFontSizeBinding.disabled = state.typographyLayer.fontSizeAuto;
-}
-
-// General params
-{
-  pane.addBinding(state, "speed", {
-    min: 0.1,
-    max: 20,
-    step: 0.1,
-  });
-  pane.addBinding(state, "useAdvanceTime", { label: "Use advanceTime()" });
-
-  pane.addBinding(state, "colorMode", {
-    label: "Color Mode",
-    options: {
-      Grayscale: "grayscale",
-      "Height Bands": "heightbands",
-      Geographical: "geographical",
-    },
-  });
-}
-
-// Actions
-{
-  const actions = pane.addFolder({ title: "Actions", expanded: true });
-  actions.addButton({ title: "Pause" }).on("click", () => {
-    state.animating = false;
-  });
-  actions.addButton({ title: "Resume" }).on("click", () => {
-    state.animating = true;
-  });
-  const initialState = pane.exportState();
-  actions.addButton({ title: "Reset to Defaults" }).on("click", () => {
-    pane.importState(initialState);
-    setTimeout(updateNoiseFolderVisibility, 0);
-  });
-}
 
 // --- Charts ---
 
 const fpsChart = new FpsChart(document.getElementById("fps-canvas"));
 
 // --- Demo canvas updating and rendering ---
+
+const canvas = document.getElementById("demo-canvas");
+const ctx = canvas.getContext("2d");
+const width = canvas.width,
+  height = canvas.height;
+
+const state = {
+  t: 0,
+};
 
 // Typography layer
 const blankImageData = new ImageData(width, height);
@@ -456,31 +75,41 @@ const typographyLayer = new ImageDataAdapter(
   2
 );
 
+let typographyDirty = true;
+typographyLayerStore.subscribe((value) => {
+  typographyDirty = true;
+});
+typographyStore.subscribe((value) => {
+  typographyDirty = true;
+});
 function renderTypographyIfNeeded() {
   if (typographyDirty) {
-    typographyLayer.enabled = state.typographyLayer.enabled;
+    const layerParams = get(typographyLayerStore);
+    const typographyParams = get(typographyStore);
+    const p = { ...layerParams, ...typographyParams };
+
+    typographyLayer.enabled = p.enabled;
     if (typographyLayer.enabled) {
-      typographyLayer.gain = state.typographyLayer.gain;
+      typographyLayer.gain = p.gain;
 
-      const t = state.typographyLayer;
       const builder = TypographyBuilder.create(width, height)
-        .text(t.text)
-        .fontFamily(t.fontFamily)
-        .padding(t.padding)
-        .fillStyle(t.fillStyle)
-        .strokeStyle(t.strokeStyle, t.strokeWidth)
-        .background(t.backgroundColor)
-        .glow(t.glowColor, t.glowSize, t.shadowOffsetX, t.shadowOffsetY)
-        .blur(t.blurAmount)
-        .innerGlow(t.innerGlowColor, t.innerGlowBlur);
+        .text(p.text)
+        .fontFamily(p.fontFamily)
+        .padding(p.padding)
+        .fillStyle(p.fillStyle)
+        .strokeStyle(p.strokeStyle, p.strokeWidth)
+        .background(p.backgroundColor)
+        .glow(p.glowColor, p.glowSize, p.shadowOffsetX, p.shadowOffsetY)
+        .blur(p.blurAmount)
+        .innerGlow(p.innerGlowColor, p.innerGlowBlur);
 
-      if (t.useGradient) {
-        builder.gradient(t.gradientColors);
+      if (p.useGradient) {
+        builder.gradient(p.gradientColors);
       }
-      if (t.fontSizeAuto) {
+      if (p.fontSizeAuto) {
         builder.autoFontSize(true);
       } else {
-        builder.fontSize(t.fontSizeManual);
+        builder.fontSize(p.fontSizeManual);
       }
 
       const typographyCanvas = builder.toCanvas();
@@ -494,54 +123,86 @@ function renderTypographyIfNeeded() {
 renderTypographyIfNeeded();
 
 // Noise layer
+let currentNoiseFlags = {};
+noiseDirtyFlagsStore.subscribe((flags) => {
+  currentNoiseFlags = flags;
+});
+
 let noise = null;
 let noiseLayer = null;
-let lastNoiseType = null;
-let lastNoiseParams = {};
+
+const noiseClasses = {
+  PerlinNoise2DTime,
+  FlowNoise2DTime,
+  FBMNoise2DTime,
+  TurbulenceNoise2DTime,
+};
 
 function instantiateNoiseIfNeeded() {
-  const noiseType = state.noiseLayer.type;
-  const params = { ...state.noiseLayer[noiseType] };
-  const paramsChanged =
-    JSON.stringify(params) !== JSON.stringify(lastNoiseParams);
+  const type = get(noiseTypeStore);
+  const store = noiseTypeToStore[type];
+  if (!store) throw new Error("Unknown noise type: " + type);
 
-  if (!noise || noiseType !== lastNoiseType || paramsChanged) {
-    const NoiseClass = noiseClasses[noiseType];
-    noise = new NoiseClass(params);
-    lastNoiseType = noiseType;
-    lastNoiseParams = params;
+  const params = get(store);
+  const flags = currentNoiseFlags;
 
-    if (!noiseLayer) {
-      noiseLayer = new NoiseAdapter(
-        noise,
-        state.noiseLayer.enabled,
-        state.noiseLayer.gain,
-        state.noiseLayer.frequency,
-        state.noiseLayer.noiseSpeed
-      );
+  if (flags[type] || flags.noiseType) {
+    let instance;
+    if (type === "FBMNoise2DTime" || type === "TurbulenceNoise2DTime") {
+      const baseType = params.baseType;
+      const baseParams =
+        baseType === "PerlinNoise2DTime"
+          ? params.perlinBaseParams
+          : params.flowBaseParams;
+
+      const BaseNoiseClass = noiseClasses[baseType];
+      if (!BaseNoiseClass)
+        throw new Error("Unknown base noise type: " + baseType);
+
+      const baseNoise = new BaseNoiseClass(baseParams);
+
+      const octaveParams = {
+        octaves: params.octaves,
+        persistence: params.persistence,
+        lacunarity: params.lacunarity,
+      };
+
+      const OctaveNoiseClass = noiseClasses[type];
+      instance = new OctaveNoiseClass(baseNoise, octaveParams);
     } else {
-      noiseLayer.noise = noise;
-      noiseLayer.enabled = state.noiseLayer.enabled;
-      noiseLayer.gain = state.noiseLayer.gain;
-      noiseLayer.frequency = state.noiseLayer.frequency;
-      noiseLayer.noiseSpeed = state.noiseLayer.noiseSpeed;
+      const NoiseClass = noiseClasses[type];
+      instance = new NoiseClass(params);
     }
-    if (noiseLayer.enabled) noiseLayer.setTime(state.t);
-  } else {
-    noiseLayer.enabled = state.noiseLayer.enabled;
-    noiseLayer.gain = state.noiseLayer.gain;
-    noiseLayer.frequency = state.noiseLayer.frequency;
-    noiseLayer.noiseSpeed = state.noiseLayer.noiseSpeed;
+
+    instance.setTime(state.t * get(noiseSpeedStore) * get(frequencyStore));
+
+    noise = instance;
+    noiseDirtyFlagsStore.clear(type);
+    noiseDirtyFlagsStore.clear("noiseType");
   }
 }
 instantiateNoiseIfNeeded();
 
+// Noise layer
+const noiseLayerParams = get(noiseLayerStore);
+const frequency = get(frequencyStore);
+const noiseSpeed = get(noiseSpeedStore);
+noiseLayer = new NoiseAdapter(
+  noise,
+  noiseLayerParams.enabled,
+  noiseLayerParams.gain,
+  frequency,
+  noiseSpeed
+);
+
 // Noise layer mask
+const maskLayerParams = get(maskLayerStore);
+
 const maskLayer = new MaskDecoratorCircle(noiseLayer, {
-  enableMasking: state.maskLayer.enableMasking,
-  radius: state.maskLayer.radius,
-  fadeOutDuration: state.maskLayer.fadeOutDuration,
-  autoFadeDuration: state.maskLayer.autoFadeDuration,
+  enableMasking: maskLayerParams.enableMasking,
+  radius: maskLayerParams.radius,
+  fadeOutDuration: maskLayerParams.fadeOutDuration,
+  autoFadeDuration: maskLayerParams.autoFadeDuration,
 });
 
 {
@@ -573,54 +234,125 @@ const maskLayer = new MaskDecoratorCircle(noiseLayer, {
   });
 }
 
+// Layer stack
+const blendingFunctions = {
+  additive: additiveBlending,
+  subtract: subtractBlending,
+  multiply: multiplyBlending,
+  screen: screenBlending,
+  overlay: overlayBlending,
+  max: maxBlending,
+  min: minBlending,
+  average: averageBlending,
+};
+
 const stack = new LayerStack(
   [typographyLayer, maskLayer],
-  blendingFunctions[state.blendingMode]
+  blendingFunctions[get(layerStackStore).blendingMode]
 );
 
 // Main loop
-
 function update(now, dt) {
-  stack.blendingFunc = blendingFunctions[state.blendingMode];
+  stack.blendingFunc = blendingFunctions[get(layerStackStore).blendingMode];
 
   renderTypographyIfNeeded();
   instantiateNoiseIfNeeded();
 
-  maskLayer.enableMasking = state.maskLayer.enableMasking;
-  maskLayer.radius = state.maskLayer.radius;
-  maskLayer.fadeOutDuration = state.maskLayer.fadeOutDuration;
-  maskLayer.autoFadeDuration = state.maskLayer.autoFadeDuration;
+  const noiseLayerParams = get(noiseLayerStore);
+  noiseLayer.noise = noise;
+  noiseLayer.enabled = noiseLayerParams.enabled;
+  noiseLayer.gain = noiseLayerParams.gain;
+  noiseLayer.frequency = get(frequencyStore);
+  noiseLayer.noiseSpeed = get(noiseSpeedStore);
 
-  if (state.animating) {
-    if (state.useAdvanceTime) {
-      stack.advanceTime(dt * state.speed);
-      state.t += dt * state.speed;
+  if (noiseLayer.enabled) {
+    noiseLayer.setTime(state.t);
+  }
+
+  const maskLayerParams = get(maskLayerStore);
+  maskLayer.enableMasking = maskLayerParams.enableMasking;
+  maskLayer.radius = maskLayerParams.radius;
+  maskLayer.fadeOutDuration = maskLayerParams.fadeOutDuration;
+  maskLayer.autoFadeDuration = maskLayerParams.autoFadeDuration;
+
+  const { animating, speed, useAdvanceTime } = get(simulationStore);
+  const frequency = get(frequencyStore);
+  const noiseSpeed = get(noiseSpeedStore);
+
+  if (animating) {
+    const newT = state.t + dt * speed;
+    state.t = newT;
+
+    if (useAdvanceTime) {
+      stack.advanceTime(dt * speed * noiseSpeed * frequency);
     } else {
-      state.t += dt * state.speed;
-      stack.setTime(state.t);
+      stack.setTime(newT * noiseSpeed * frequency);
     }
   }
 
   fpsChart.record(now);
 }
 
+function renderGrid(
+  ctx,
+  width,
+  height,
+  frequency,
+  color = "rgba(255, 255, 255, 0.2)"
+) {
+  const cellSize = 1 / frequency;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  // Vertical lines
+  for (let x = 0; x < width; x += cellSize) {
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, height);
+  }
+  // Horizontal lines
+  for (let y = 0; y < height; y += cellSize) {
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+  }
+  ctx.stroke();
+}
+
+function renderPieChart(
+  ctx,
+  x,
+  y,
+  radius,
+  progress,
+  color = "rgba(255, 0, 0, 0.5)"
+) {
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.arc(x, y, radius, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * progress);
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+}
+
 function render() {
+  const frequency = get(frequencyStore);
+  const noiseSpeed = get(noiseSpeedStore);
+  const { colorMode, showScaleVisualization } = get(uiStore);
+
   const img = ctx.createImageData(width, height);
   let i = 0;
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const value = stack.getValue(x, y);
-
       let r, g, b;
-      switch (state.colorMode) {
-        case "heightbands": {
+      switch (colorMode) {
+        case COLOR_MODE.HEIGHT_BANDS: {
           const bands = 12;
           const bandIndex = Math.floor(value * bands);
           const isBlack = bandIndex % 2 === 0;
           r = g = b = isBlack ? 0 : 255;
           break;
         }
-        case "geographical": {
+        case COLOR_MODE.GEOGRAPHICAL: {
           if (value >= 0.5) {
             r = 0;
             g = Math.floor(255 * value);
@@ -632,7 +364,7 @@ function render() {
           }
           break;
         }
-        case "grayscale":
+        case COLOR_MODE.GRAYSCALE:
         default: {
           const c = Math.floor(255 * value);
           r = g = b = c;
@@ -647,6 +379,13 @@ function render() {
     }
   }
   ctx.putImageData(img, 0, 0);
+
+  if (showScaleVisualization) {
+    renderGrid(ctx, width, height, frequency);
+    const period = 1 / (frequency * noiseSpeed);
+    const progress = (state.t % period) / period;
+    renderPieChart(ctx, width - 50, 50, 20, progress);
+  }
 
   fpsChart.draw();
 }
