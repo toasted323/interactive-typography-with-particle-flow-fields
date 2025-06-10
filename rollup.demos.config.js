@@ -72,7 +72,13 @@ export default [
     },
     plugins: [
       alias({ entries: aliasEntries }),
-      nodeResolve({ browser: true }),
+      svelte(svelteOptions),
+      css({ output: "bundle.css" }),
+      nodeResolve({
+        browser: true,
+        dedupe: ["svelte"],
+        exportConditions: ["svelte"],
+      }),
       commonjs(),
       production && terser(),
     ],
