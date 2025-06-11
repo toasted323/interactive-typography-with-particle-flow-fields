@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>TypographyBuilder Demo</title>
+  <style>
+    body {
+      margin: 0;
+      background: #222;
+      color: #eee;
+      font-family: system-ui, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 1em;
+      font-size: 2em;
+      font-weight: bold;
+    }
+
+    main {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: center;
+      margin-top: 2em;
+      gap: 2em;
+      width: 100%;
+      max-width: 1200px;
+      box-sizing: border-box;
+      padding: 0 1em;
+    }
+
+    #left-column,
+    #right-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #demo-canvas {
+      background: #111;
+      display: block;
+      width: 600px;
+      height: 300px;
+    }
+
+    #ui {
+        width: 320px;
+        min-width: 280px;
+    }
+
+    .tp-dfwv {
+        width: 100% !important;
+    }
+  </style>
+</head>
+<body>
+<h1>TypographyBuilder Demo</h1>
+<main>
+  <div id="left-column">
+    <canvas id="demo-canvas" width="600" height="300"></canvas>
+  </div>
+  <div id="right-column">
+    <div id="ui"></div>
+  </div>
+</main>
+<script type="module" src="bundle.js"></script>
+</body>
+</html>

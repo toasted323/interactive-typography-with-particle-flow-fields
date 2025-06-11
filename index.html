@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="interactive-typography-with-particle-flow-fields">Interactive
+Typography with Particle Flow Fields</h1>
+<p>Interactive typography experiment with procedural flow fields and
+particles. Inspired by an original AS3 implementation, reimagined in
+JavaScript.</p>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ul>
+<li><a href="#live-demos">Live Demos</a></li>
+<li><a href="#file-structure">File Structure</a></li>
+<li><a href="#noise-implementations--attribution">Noise Implementations
+&amp; Attribution</a></li>
+<li><a href="#licensing">Licensing</a></li>
+<li><a href="#attribution">Attribution</a></li>
+<li><a href="#references">References</a></li>
+<li><a href="#contact">Contact</a></li>
+</ul>
+<hr />
+<h2 id="live-demos">Live Demos</h2>
+<p>These live demos are both interactive showcases and also serve as
+visual testing environments.</p>
+<ul>
+<li><a
+href="https://toasted323.github.io/interactive-typography-with-particle-flow-fields/demos/noise2dtime/">Noise2DTime
+Demo</a></li>
+<li><a
+href="https://toasted323.github.io/interactive-typography-with-particle-flow-fields/demos/typography-builder/">TypographyBuilder
+Demo</a></li>
+<li><a
+href="https://toasted323.github.io/interactive-typography-with-particle-flow-fields/demos/layer-stack/">LayerStack
+Demo</a></li>
+</ul>
+<hr />
+<h2 id="file-structure">File Structure</h2>
+<pre><code>.
+├── public/                     # Static assets, presets, and 
+│   │                           # target for built outputs
+│   ├── demos/                  # One folder per demo
+│   └── main/                   # Same for main applications
+├── src/
+│   ├── lib/                    # Core, framework-agnostic logic
+│   └── apps/
+│       ├── demos/              # Source code for technical demos
+│       ├── main/               # Source for main visual 
+│       │                       # experiences
+│       └── shared/             # Shared UI and application
+│                               # logic
+├── scripts/                    # Development scripts
+├── tests/                      # Manual/automated tests
+├── LICENSE                     # MIT License for all source code
+├── LICENSE-CC-BY-4.0.txt       # CC BY 4.0 for demo visuals
+│                               # and presets
+├── LICENSE-CC-BY-NC-SA-4.0.txt # CC BY-NC-SA 4.0 for main visuals
+│                               # and presets
+├── jsconfig.json               # Path alias configuration
+└── README.md                   # Project documentation</code></pre>
+<hr />
+<h2 id="noise-implementations-attribution">Noise Implementations &amp;
+Attribution</h2>
+<p>This repository includes several procedural noise implementations,
+each with academic and open-source origins:</p>
+<ul>
+<li><strong>Flow Noise</strong>: Based on Perlin &amp; Neyret
+(2001).</li>
+<li><strong>Improved Perlin Noise</strong>: Based on Ken Perlin’s
+improved algorithm (2002) and open-source implementations by Stefan
+Gustavson and others.</li>
+<li><strong>Curl Noise</strong>: Based on Robert Bridson’s “Curl-Noise
+for Procedural Fluid Flow” (<a
+href="https://www.cs.ubc.ca/~rbridson/docs/bridson-siggraph2007-curlnoise.pdf">SIGGRAPH
+2007</a>).</li>
+</ul>
+<p>See the source files and comments for detailed attribution.</p>
+<hr />
+<h2 id="licensing">Licensing</h2>
+<p>Except where otherwise noted, all content in this repository is
+licensed as follows:</p>
+<ul>
+<li><p><strong>Source code and HTML</strong></p>
+<ul>
+<li>Files in <code>src/</code>, <code>scripts/</code>,
+<code>tests/</code>, and all HTML files in <code>public/</code></li>
+</ul>
+<p>Licensed under the <a href="./LICENSE">MIT License</a>. The MIT
+License applies only to source code and HTML files.</p></li>
+<li><p><strong>Technical demo content:</strong></p>
+<ul>
+<li>Visuals, interactive animations, and visual experiences generated by
+the applications built from the source code in
+<code>public/demos/</code> and <code>src/apps/demos/</code></li>
+</ul>
+<p>Licensed under the <a href="./LICENSE-CC-BY-4.0.txt">Creative Commons
+Attribution 4.0 International (CC BY 4.0)</a> (<a
+href="https://creativecommons.org/licenses/by/4.0/">official
+text</a>).</p></li>
+<li><p><strong>Main content:</strong></p>
+<ul>
+<li>Visuals, interactive animations, and visual experiences generated by
+the applications built from the source code in <code>public/main/</code>
+and <code>src/apps/main/</code></li>
+<li>Presets contained in <code>public/main/</code></li>
+</ul>
+<p>Licensed under the <a href="./LICENSE-CC-BY-NC-SA-4.0.txt">Creative
+Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC
+BY-NC-SA 4.0)</a> (<a
+href="https://creativecommons.org/licenses/by-nc-sa/4.0/">official
+text</a>).</p></li>
+</ul>
+<blockquote>
+<p><strong>Note:</strong><br />
+Each license file is included in the repository root, in build
+artifacts, and in published deployments.</p>
+</blockquote>
+<hr />
+<h2 id="attribution">Attribution</h2>
+<p>Unless otherwise noted, all visuals, interactive animations, and
+presets produced by this project are attributed as follows:</p>
+<p><strong>For technical demo content, reference as shown
+below:</strong></p>
+<blockquote>
+<p><a
+href="https://toasted323.github.io/interactive-typography-with-particle-flow-fields/demos/noise2dtime/">Noise2DTime
+Demo</a> by <a
+href="https://github.com/toasted323">github.com/toasted323</a> is
+licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC
+BY 4.0</a>.</p>
+</blockquote>
+<p><strong>For main content, follow this attribution
+example:</strong></p>
+<blockquote>
+<p><a
+href="https://toasted323.github.io/interactive-typography-with-particle-flow-fields/main/hello-world-1/">Hello
+World 1</a> by <a
+href="https://github.com/toasted323">github.com/toasted323</a> is
+licensed under <a
+href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA
+4.0</a>.</p>
+</blockquote>
+<p>The source code is licensed separately under the MIT License.</p>
+<hr />
+<h2 id="references">References</h2>
+<ul>
+<li>Perlin, K. “An Image Synthesizer”, SIGGRAPH, 1985.</li>
+<li>Perlin, K., &amp; Neyret, F. “Flow Noise”, 2001.</li>
+<li>Perlin, K. “Improving Noise”, ACM Transactions on Graphics (TOG),
+Vol. 21, No. 3, July 2002, pp. 681–682.</li>
+<li>Bridson, R., Hourihan, J., &amp; Nordenstam, M. “Curl-Noise for
+Procedural Fluid Flow”, SIGGRAPH 2007.</li>
+<li><a href="https://github.com/stegu/perlin-noise">Stefan Gustavson,
+“perlin-noise” reference implementations</a></li>
+<li><a
+href="https://github.com/josephg/noisejs/blob/master/perlin.js">josephg’s
+noisejs repository</a></li>
+</ul>
+<hr />
+<h2 id="contact">Contact</h2>
+<p>Copyright (c) 2025 <a
+href="https://github.com/toasted323">github.com/toasted323</a></p>
+</body>
+</html>
