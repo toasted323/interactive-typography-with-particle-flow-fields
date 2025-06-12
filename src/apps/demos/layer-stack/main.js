@@ -30,8 +30,6 @@ import {
   noiseLayerStore,
   noiseTypeStore,
   noiseTypeToStore,
-  frequencyStore,
-  noiseTimeScaleStore,
   noiseDirtyFlagsStore,
 } from "./stores/noiseLayer.js";
 import {
@@ -174,7 +172,8 @@ function instantiateNoiseIfNeeded() {
       instance = new NoiseClass(params);
     }
 
-    instance.setTime(state.t * get(noiseTimeScaleStore) * get(frequencyStore));
+    const { frequency, noiseTimeScale } = get(noiseLayerStore);
+    instance.setTime(state.t * frequency * noiseTimeScale);
 
     noise = instance;
     noiseDirtyFlagsStore.clear(type);
@@ -185,14 +184,12 @@ instantiateNoiseIfNeeded();
 
 // Noise layer
 const noiseLayerParams = get(noiseLayerStore);
-const frequency = get(frequencyStore);
-const noiseTimeScale = get(noiseTimeScaleStore);
 noiseLayer = new NoiseAdapter(
   noise,
   noiseLayerParams.enabled,
   noiseLayerParams.gain,
-  frequency,
-  noiseTimeScale
+  noiseLayerParams.frequency,
+  noiseLayerParams.noiseTimeScale
 );
 
 // Noise layer mask
@@ -262,8 +259,8 @@ function update(now, dt) {
   noiseLayer.noise = noise;
   noiseLayer.enabled = noiseLayerParams.enabled;
   noiseLayer.gain = noiseLayerParams.gain;
-  noiseLayer.frequency = get(frequencyStore);
-  noiseLayer.noiseTimeScale = get(noiseTimeScaleStore);
+  noiseLayer.frequency = noiseLayerParams.frequency;
+  noiseLayer.noiseTimeScale = noiseLayerParams.noiseTimeScale;
 
   if (noiseLayer.enabled) {
     noiseLayer.setTime(state.t);
@@ -276,8 +273,7 @@ function update(now, dt) {
   maskLayer.autoFadeDuration = maskLayerParams.autoFadeDuration;
 
   const { animating, timeScale, useAdvanceTime } = get(simulationStore);
-  const frequency = get(frequencyStore);
-  const noiseTimeScale = get(noiseTimeScaleStore);
+  const { frequency, noiseTimeScale } = get(noiseLayerStore);
 
   if (animating) {
     const newT = state.t + dt * timeScale;
@@ -334,8 +330,7 @@ function renderPieChart(
 }
 
 function render() {
-  const frequency = get(frequencyStore);
-  const noiseTimeScale = get(noiseTimeScaleStore);
+  const { frequency, noiseTimeScale } = get(noiseLayerStore);
   const { colorMode, showScaleVisualization } = get(uiStore);
 
   const img = ctx.createImageData(width, height);

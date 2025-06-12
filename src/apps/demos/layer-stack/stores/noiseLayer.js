@@ -5,6 +5,8 @@ function createNoiseLayerParams() {
   const defaults = {
     enabled: true,
     gain: 1,
+    frequency: 0.05,
+    noiseTimeScale: 20.0,
   };
   const { subscribe, set, update } = writable({ ...defaults });
   return {
@@ -16,6 +18,12 @@ function createNoiseLayerParams() {
     },
     setGain(gain) {
       update((state) => ({ ...state, gain }));
+    },
+    setFrequency(frequency) {
+      update((state) => ({ ...state, frequency }));
+    },
+    setNoiseTimeScale(noiseTimeScale) {
+      update((state) => ({ ...state, noiseTimeScale }));
     },
     reset() {
       set({ ...defaults });
@@ -153,29 +161,6 @@ function createNoiseTypeParam() {
 }
 export const noiseTypeStore = createNoiseTypeParam();
 
-// --- Frequency and noise time scale ---
-function createFrequencyParam() {
-  const DEFAULT = 0.05;
-  const { subscribe, set } = writable(DEFAULT);
-  return {
-    subscribe,
-    set,
-    reset: () => set(DEFAULT),
-  };
-}
-export const frequencyStore = createFrequencyParam();
-
-function createNoiseTimeScaleStore() {
-  const DEFAULT = 20.0;
-  const { subscribe, set } = writable(DEFAULT);
-  return {
-    subscribe,
-    set,
-    reset: () => set(DEFAULT),
-  };
-}
-export const noiseTimeScaleStore = createNoiseTimeScaleStore();
-
 // --- Dirty flags ---
 function createDirtyFlags() {
   const defaults = {
@@ -184,8 +169,6 @@ function createDirtyFlags() {
     FBMNoise2DTime: false,
     TurbulenceNoise2DTime: false,
     noiseType: false,
-    frequency: false,
-    noiseTimeScale: false,
   };
   const { subscribe, set, update } = writable({ ...defaults });
   perlinStore.subscribe(() =>
@@ -202,12 +185,6 @@ function createDirtyFlags() {
   );
   noiseTypeStore.subscribe(() =>
     update((flags) => ({ ...flags, noiseType: true }))
-  );
-  frequencyStore.subscribe(() =>
-    update((flags) => ({ ...flags, frequency: true }))
-  );
-  noiseTimeScaleStore.subscribe(() =>
-    update((flags) => ({ ...flags, noiseTimeScale: true }))
   );
 
   function clear(flag) {
