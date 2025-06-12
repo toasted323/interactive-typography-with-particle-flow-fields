@@ -39,11 +39,11 @@ export class NoiseAdapter {
   frequency;
 
   /**
-   * Speed multiplier for noise time evolution.
+   * Time scale multiplier for noise time evolution.
    * @type {number}
    * @public
    */
-  noiseSpeed;
+  noiseTimeScale;
 
   /**
    * Create a new NoiseAdapter.
@@ -51,14 +51,20 @@ export class NoiseAdapter {
    * @param {boolean} [enabled=true] - Whether the layer is enabled.
    * @param {number} [gain=1] - Output multiplier.
    * @param {number} [frequency=1] - Noise frequency.
-   * @param {number} [noiseSpeed=1] - Noise temporal evolution speed.
+   * @param {number} [noiseTimeScale=1] - Noise temporal evolution scale.
    */
-  constructor(noise, enabled = true, gain = 1, frequency = 1, noiseSpeed = 1) {
+  constructor(
+    noise,
+    enabled = true,
+    gain = 1,
+    frequency = 1,
+    noiseTimeScale = 1
+  ) {
     this.noise = noise;
     this.enabled = enabled;
     this.gain = gain;
     this.frequency = frequency;
-    this.noiseSpeed = noiseSpeed;
+    this.noiseTimeScale = noiseTimeScale;
   }
 
   /**
@@ -91,7 +97,7 @@ export class NoiseAdapter {
   }
 
   /**
-   * Set the current time for the underlying noise, applying noiseSpeed and frequency.
+   * Set the current time for the underlying noise, applying noiseTimeScale and frequency.
    * Throws if the layer is disabled.
    * @param {number} t - Time value.
    * @throws {Error} if the layer is disabled.
@@ -100,11 +106,11 @@ export class NoiseAdapter {
     if (!this.enabled) {
       throw new Error("setTime() called on disabled layer");
     }
-    this.noise.setTime(t * this.noiseSpeed * this.frequency);
+    this.noise.setTime(t * this.noiseTimeScale * this.frequency);
   }
 
   /**
-   * Advance the current time for the underlying noise, applying noiseSpeed and frequency.
+   * Advance the current time for the underlying noise, applying noiseTimeScale and frequency.
    * Throws if the layer is disabled.
    * @param {number} dt - Time delta.
    * @throws {Error} if the layer is disabled.
@@ -113,6 +119,6 @@ export class NoiseAdapter {
     if (!this.enabled) {
       throw new Error("advanceTime() called on disabled layer");
     }
-    this.noise.advanceTime(dt * this.noiseSpeed * this.frequency);
+    this.noise.advanceTime(dt * this.noiseTimeScale * this.frequency);
   }
 }

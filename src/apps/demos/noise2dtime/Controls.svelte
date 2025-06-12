@@ -16,7 +16,7 @@
     fbmStore,
     turbulenceStore,
     frequencyStore,
-    noiseSpeedStore,
+    noiseTimeScaleStore,
   } from "./stores/noise.js";
 
   import { simulationStore } from "./stores/simulation.js";
@@ -31,7 +31,7 @@
     fbmStore.reset();
     turbulenceStore.reset();
     frequencyStore.reset();
-    noiseSpeedStore.reset();
+    noiseTimeScaleStore.reset();
 
     // --- Simulation ---
     simulationStore.reset();
@@ -286,12 +286,12 @@
       on:change={(e) => frequencyStore.set(e.detail.value)}
     />
     <Slider
-      label="Noise Speed"
+      label="Noise Time Scale"
       min={0.1}
       max={1000}
       step={0.1}
-      value={$noiseSpeedStore}
-      on:change={(e) => noiseSpeedStore.set(e.detail.value)}
+      value={$noiseTimeScaleStore}
+      on:change={(e) => noiseTimeScaleStore.set(e.detail.value)}
     />
   </Folder>
 

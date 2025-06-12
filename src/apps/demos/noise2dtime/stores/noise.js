@@ -129,7 +129,7 @@ function createNoiseTypeStore() {
 }
 export const noiseTypeStore = createNoiseTypeStore();
 
-// --- Frequency and noise speed ---
+// --- Frequency and noise time scale ---
 function createFrequencyStore() {
   const DEFAULT = 0.05;
   const { subscribe, set } = writable(DEFAULT);
@@ -141,7 +141,7 @@ function createFrequencyStore() {
 }
 export const frequencyStore = createFrequencyStore();
 
-function createNoiseSpeedStore() {
+function createNoiseTimeScaleStore() {
   const DEFAULT = 20.0;
   const { subscribe, set } = writable(DEFAULT);
   return {
@@ -150,7 +150,7 @@ function createNoiseSpeedStore() {
     reset: () => set(DEFAULT),
   };
 }
-export const noiseSpeedStore = createNoiseSpeedStore();
+export const noiseTimeScaleStore = createNoiseTimeScaleStore();
 
 // --- Dirty flags ---
 function createDirtyFlags() {
@@ -161,7 +161,7 @@ function createDirtyFlags() {
     TurbulenceNoise2DTime: false,
     noiseType: false,
     frequency: false,
-    noiseSpeed: false,
+    noiseTimeScale: false,
   };
   const { subscribe, set, update } = writable({ ...defaults });
   perlinStore.subscribe(() =>
@@ -182,8 +182,8 @@ function createDirtyFlags() {
   frequencyStore.subscribe(() =>
     update((flags) => ({ ...flags, frequency: true }))
   );
-  noiseSpeedStore.subscribe(() =>
-    update((flags) => ({ ...flags, noiseSpeed: true }))
+  noiseTimeScaleStore.subscribe(() =>
+    update((flags) => ({ ...flags, noiseTimeScale: true }))
   );
 
   function clear(flag) {

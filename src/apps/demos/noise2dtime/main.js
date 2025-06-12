@@ -13,7 +13,7 @@ import {
   noiseTypeStore,
   noiseTypeToStore,
   frequencyStore,
-  noiseSpeedStore,
+  noiseTimeScaleStore,
   noiseDirtyFlagsStore,
 } from "./stores/noise.js";
 
@@ -95,7 +95,7 @@ function instantiateNoiseIfNeeded() {
       instance = new NoiseClass(params);
     }
 
-    instance.setTime(state.t * get(noiseSpeedStore) * get(frequencyStore));
+    instance.setTime(state.t * get(noiseTimeScaleStore) * get(frequencyStore));
 
     noise = instance;
     noiseDirtyFlagsStore.clear(noiseType);
@@ -113,16 +113,16 @@ function update(now, dt) {
 
   const { animating, speed, useAdvanceTime } = get(simulationStore);
   const frequency = get(frequencyStore);
-  const noiseSpeed = get(noiseSpeedStore);
+  const noiseTimeScale = get(noiseTimeScaleStore);
 
   if (animating) {
     const newT = state.t + dt * speed;
     state.t = newT;
 
     if (useAdvanceTime) {
-      noise.advanceTime(dt * speed * noiseSpeed * frequency);
+      noise.advanceTime(dt * speed * noiseTimeScale * frequency);
     } else {
-      noise.setTime(newT * noiseSpeed * frequency);
+      noise.setTime(newT * noiseTimeScale * frequency);
     }
   }
 
@@ -188,7 +188,7 @@ function renderPieChart(
 function render() {
   const noiseValues = state.noiseValues;
   const frequency = get(frequencyStore);
-  const noiseSpeed = get(noiseSpeedStore);
+  const noiseTimeScale = get(noiseTimeScaleStore);
   const { colorMode, showScaleVisualization } = get(uiStore);
 
   const img = ctx.createImageData(width, height);
@@ -236,7 +236,7 @@ function render() {
 
   if (showScaleVisualization) {
     renderGrid(ctx, width, height, frequency);
-    const period = 1 / (frequency * noiseSpeed);
+    const period = 1 / (frequency * noiseTimeScale);
     const progress = (state.t % period) / period;
     renderPieChart(ctx, width - 50, 50, 20, progress);
   }
