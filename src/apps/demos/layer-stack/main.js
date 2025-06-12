@@ -273,16 +273,15 @@ function update(now, dt) {
   maskLayer.autoFadeDuration = maskLayerParams.autoFadeDuration;
 
   const { animating, timeScale, useAdvanceTime } = get(simulationStore);
-  const { frequency, noiseTimeScale } = get(noiseLayerStore);
 
   if (animating) {
     const newT = state.t + dt * timeScale;
     state.t = newT;
 
     if (useAdvanceTime) {
-      stack.advanceTime(dt * timeScale * noiseTimeScale * frequency);
+      stack.advanceTime(dt * timeScale);
     } else {
-      stack.setTime(newT * noiseTimeScale * frequency);
+      stack.setTime(newT);
     }
   }
 
