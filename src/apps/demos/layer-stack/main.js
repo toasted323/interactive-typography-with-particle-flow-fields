@@ -262,10 +262,6 @@ function update(now, dt) {
   noiseLayer.frequency = noiseLayerParams.frequency;
   noiseLayer.noiseTimeScale = noiseLayerParams.noiseTimeScale;
 
-  if (noiseLayer.enabled) {
-    noiseLayer.setTime(state.t);
-  }
-
   const maskLayerParams = get(maskLayerStore);
   maskLayer.enableMasking = maskLayerParams.enableMasking;
   maskLayer.radius = maskLayerParams.radius;
