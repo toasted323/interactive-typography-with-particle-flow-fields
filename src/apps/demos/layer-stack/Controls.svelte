@@ -538,11 +538,11 @@
       on:change={(e) => simulationStore.setAnimating(e.detail.value)}
     />
     <Slider
-      label="Speed"
+      label="Time Scale"
       min={0.1}
       max={20}
       step={0.1}
-      value={$simulationStore.speed}
+      value={$simulationStore.timeScale}
       on:change={(e) => simulationStore.setSpeed(e.detail.value)}
     />
     <Checkbox

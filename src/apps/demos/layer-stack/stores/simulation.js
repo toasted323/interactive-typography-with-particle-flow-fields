@@ -3,7 +3,7 @@ import { writable } from "svelte/store";
 function createSimulationParams() {
   const defaults = {
     animating: true,
-    speed: 1,
+    timeScale: 1,
     useAdvanceTime: false,
   };
   const { subscribe, set, update } = writable({ ...defaults });
@@ -12,8 +12,8 @@ function createSimulationParams() {
     subscribe,
     set,
     update,
-    setSpeed(speed) {
-      update((state) => ({ ...state, speed }));
+    setSpeed(timeScale) {
+      update((state) => ({ ...state, timeScale }));
     },
     setAnimating(animating) {
       update((state) => ({ ...state, animating }));

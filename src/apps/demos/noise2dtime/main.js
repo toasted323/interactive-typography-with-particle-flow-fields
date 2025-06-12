@@ -111,16 +111,16 @@ const state = {
 function update(now, dt) {
   instantiateNoiseIfNeeded();
 
-  const { animating, speed, useAdvanceTime } = get(simulationStore);
+  const { animating, timeScale, useAdvanceTime } = get(simulationStore);
   const frequency = get(frequencyStore);
   const noiseTimeScale = get(noiseTimeScaleStore);
 
   if (animating) {
-    const newT = state.t + dt * speed;
+    const newT = state.t + dt * timeScale;
     state.t = newT;
 
     if (useAdvanceTime) {
-      noise.advanceTime(dt * speed * noiseTimeScale * frequency);
+      noise.advanceTime(dt * timeScale * noiseTimeScale * frequency);
     } else {
       noise.setTime(newT * noiseTimeScale * frequency);
     }
