@@ -127,7 +127,7 @@ noiseDirtyFlagsStore.subscribe((flags) => {
 });
 
 let noise = null;
-let noiseLayer = null;
+let lastNoise = null;
 
 const noiseClasses = {
   PerlinNoise2DTime,
@@ -172,9 +172,6 @@ function instantiateNoiseIfNeeded() {
       instance = new NoiseClass(params);
     }
 
-    const { frequency, noiseTimeScale } = get(noiseLayerStore);
-    instance.setTime(state.t * frequency * noiseTimeScale);
-
     noise = instance;
     noiseDirtyFlagsStore.clear(type);
     noiseDirtyFlagsStore.clear("noiseType");
@@ -182,9 +179,8 @@ function instantiateNoiseIfNeeded() {
 }
 instantiateNoiseIfNeeded();
 
-// Noise layer
 const noiseLayerParams = get(noiseLayerStore);
-noiseLayer = new NoiseAdapter(
+const noiseLayer = new NoiseAdapter(
   noise,
   noiseLayerParams.enabled,
   noiseLayerParams.gain,
@@ -256,7 +252,10 @@ function update(now, dt) {
   instantiateNoiseIfNeeded();
 
   const noiseLayerParams = get(noiseLayerStore);
-  noiseLayer.noise = noise;
+  if (lastNoise !== noise) {
+    noiseLayer.attachNoise(noise);
+    lastNoise = noise;
+  }
   noiseLayer.enabled = noiseLayerParams.enabled;
   noiseLayer.gain = noiseLayerParams.gain;
   noiseLayer.frequency = noiseLayerParams.frequency;

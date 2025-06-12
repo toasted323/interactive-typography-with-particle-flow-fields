@@ -25,13 +25,6 @@ export class NoiseAdapter {
   gain = 1.0;
 
   /**
-   * The wrapped Noise2DTime instance.
-   * @type {Noise2DTime}
-   * @public
-   */
-  noise;
-
-  /**
    * Frequency multiplier for noise coordinates.
    * @type {number}
    * @public
@@ -44,6 +37,21 @@ export class NoiseAdapter {
    * @public
    */
   noiseTimeScale;
+
+  /**
+   * Cached last simulation time set on this adapter.
+   * Used to synchronize newly attached noise instances.
+   * @type {number}
+   * @private
+   */
+  #lastTime = 0;
+
+  /**
+   * The wrapped Noise2DTime instance (private).
+   * @type {Noise2DTime}
+   * @private
+   */
+  #noise;
 
   /**
    * Create a new NoiseAdapter.
@@ -60,11 +68,31 @@ export class NoiseAdapter {
     frequency = 1,
     noiseTimeScale = 1
   ) {
-    this.noise = noise;
+    this.#noise = noise;
     this.enabled = enabled;
     this.gain = gain;
     this.frequency = frequency;
     this.noiseTimeScale = noiseTimeScale;
+  }
+
+  /**
+   * Read-only access to the wrapped Noise2DTime instance.
+   * @returns {Noise2DTime}
+   */
+  get noise() {
+    return this.#noise;
+  }
+
+  /**
+   * Attach a new Noise2DTime instance to this adapter and synchronize its internal time.
+   * The new noise instance will immediately receive the last simulation time set on the adapter,
+   * mapped through the current frequency and noiseTimeScale.
+   *
+   * @param {Noise2DTime} newNoise - The new Noise2DTime instance to attach.
+   */
+  attachNoise(newNoise) {
+    this.#noise = newNoise;
+    this.#noise.setTime(this.#lastTime * this.noiseTimeScale * this.frequency);
   }
 
   /**
@@ -83,7 +111,7 @@ export class NoiseAdapter {
     return (
       this.gain *
       0.5 *
-      (this.noise.getValue(x * this.frequency, y * this.frequency) + 1)
+      (this.#noise.getValue(x * this.frequency, y * this.frequency) + 1)
     );
   }
 
@@ -93,7 +121,7 @@ export class NoiseAdapter {
    * @readonly
    */
   get time() {
-    return this.noise.time;
+    return this.#noise.time;
   }
 
   /**
@@ -106,7 +134,8 @@ export class NoiseAdapter {
     if (!this.enabled) {
       throw new Error("setTime() called on disabled layer");
     }
-    this.noise.setTime(t * this.noiseTimeScale * this.frequency);
+    this.#lastTime = t;
+    this.#noise.setTime(t * this.noiseTimeScale * this.frequency);
   }
 
   /**
@@ -119,6 +148,7 @@ export class NoiseAdapter {
     if (!this.enabled) {
       throw new Error("advanceTime() called on disabled layer");
     }
-    this.noise.advanceTime(dt * this.noiseTimeScale * this.frequency);
+    this.#lastTime += dt;
+    this.#noise.advanceTime(dt * this.noiseTimeScale * this.frequency);
   }
 }
