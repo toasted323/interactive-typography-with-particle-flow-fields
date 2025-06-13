@@ -86,23 +86,23 @@ function update(now, dt) {
     } else {
       noise.setTime(newT * noiseTimeScale * frequency);
     }
-  }
 
-  let noiseValues = [];
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const value = noise.getValue(x * frequency, y * frequency);
-      noiseValues.push(value);
+    let noiseValues = [];
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const value = noise.getValue(x * frequency, y * frequency);
+        noiseValues.push(value);
+      }
     }
+
+    histogramChart.update(noiseValues);
+
+    const min = noiseValues.reduce((a, b) => Math.min(a, b), Infinity);
+    const max = noiseValues.reduce((a, b) => Math.max(a, b), -Infinity);
+    minMaxChart.record(min, max);
+
+    state.noiseValues = noiseValues;
   }
-
-  histogramChart.update(noiseValues);
-
-  const min = noiseValues.reduce((a, b) => Math.min(a, b), Infinity);
-  const max = noiseValues.reduce((a, b) => Math.max(a, b), -Infinity);
-  minMaxChart.record(min, max);
-
-  state.noiseValues = noiseValues;
 
   fpsChart.record(now);
 }
