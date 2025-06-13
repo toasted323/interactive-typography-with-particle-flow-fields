@@ -31,7 +31,9 @@ import {
 } from "./stores/noiseLayer.js";
 import {
   typographyLayerStore,
+  typographyLayerDirtyFlagStore,
   typographyStore,
+  typographyDirtyFlagStore,
 } from "./stores/typographyLayer.js";
 import { simulationStore } from "./stores/simulation.js";
 import { COLOR_MODE, uiStore } from "./stores/ui.js";
@@ -70,22 +72,20 @@ const typographyLayer = new ImageDataAdapter(
   2
 );
 
-let typographyDirty = true;
-typographyLayerStore.subscribe((value) => {
-  typographyDirty = true;
-});
-typographyStore.subscribe((value) => {
-  typographyDirty = true;
-});
-function renderTypographyIfNeeded() {
-  if (typographyDirty) {
-    const layerParams = get(typographyLayerStore);
-    const typographyParams = get(typographyStore);
+function updateTypography() {
+  const layerParams = get(typographyLayerStore);
+  typographyLayer.enabled = layerParams.enabled;
 
-    typographyLayer.enabled = layerParams.enabled;
-    if (typographyLayer.enabled) {
+  if (typographyLayer.enabled) {
+    // Layer
+    if (get(typographyLayerDirtyFlagStore)) {
       typographyLayer.gain = layerParams.gain;
+      typographyLayerDirtyFlagStore.clear();
+    }
 
+    // Typography
+    if (get(typographyDirtyFlagStore)) {
+      const typographyParams = get(typographyStore);
       const typographyCanvas = buildTypographyCanvas(
         typographyParams,
         canvas.width,
@@ -94,11 +94,13 @@ function renderTypographyIfNeeded() {
       typographyLayer.imageData = typographyCanvas
         .getContext("2d")
         .getImageData(0, 0, width, height);
+
+      typographyDirtyFlagStore.clear();
     }
-    typographyDirty = false;
   }
 }
-renderTypographyIfNeeded();
+
+updateTypography();
 
 // Noise layer
 let currentNoiseFlags = {};
@@ -194,7 +196,7 @@ const stack = new LayerStack(
 function update(now, dt) {
   stack.blendingFunc = blendingFunctions[get(layerStackStore).blendingMode];
 
-  renderTypographyIfNeeded();
+  updateTypography();
   instantiateNoiseIfNeeded();
 
   const noiseLayerParams = get(noiseLayerStore);

@@ -95,3 +95,38 @@ function createTypographyParams() {
 }
 
 export const typographyStore = createTypographyParams();
+
+// --- Dirty flags ---
+function createTypographyDirtyFlag() {
+  const { subscribe, set } = writable(true); // initially dirty
+
+  typographyStore.subscribe(() => set(true));
+
+  function clear() {
+    set(false);
+  }
+
+  return {
+    subscribe,
+    clear,
+  };
+}
+
+export const typographyDirtyFlagStore = createTypographyDirtyFlag();
+
+function createTypographyLayerDirtyFlag() {
+  const { subscribe, set } = writable(true); // initially dirty
+
+  typographyLayerStore.subscribe(() => set(true));
+
+  function clear() {
+    set(false);
+  }
+
+  return {
+    subscribe,
+    clear,
+  };
+}
+
+export const typographyLayerDirtyFlagStore = createTypographyLayerDirtyFlag();
