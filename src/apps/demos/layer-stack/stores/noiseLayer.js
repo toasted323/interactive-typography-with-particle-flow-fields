@@ -32,6 +32,19 @@ function createNoiseLayerParams() {
 }
 export const noiseLayerStore = createNoiseLayerParams();
 
+// --- Null noise params ---
+function createNullNoiseParams() {
+  const defaults = {}; // No params
+  const { subscribe, set, update } = writable({ ...defaults });
+  return {
+    subscribe,
+    set,
+    update,
+    reset: () => set({ ...defaults }),
+  };
+}
+export const nullNoiseStore = createNullNoiseParams();
+
 // --- Perlin noise params ---
 function createPerlinParams() {
   const defaults = { seed: 0 };
@@ -137,6 +150,7 @@ export const turbulenceStore = createTurbulenceParams();
 
 // --- Noise type ---
 export const noiseTypeToStore = {
+  NullNoise: nullNoiseStore,
   PerlinNoise2DTime: perlinStore,
   FlowNoise2DTime: flowStore,
   FBMNoise2DTime: fbmStore,
@@ -162,7 +176,7 @@ function createNoiseTypeParam() {
 export const noiseTypeStore = createNoiseTypeParam();
 
 // --- Dirty flags ---
-function createDirtyFlags() {
+function createNoiseDirtyFlags() {
   const defaults = {
     PerlinNoise2DTime: false,
     FlowNoise2DTime: false,
@@ -201,4 +215,21 @@ function createDirtyFlags() {
   };
 }
 
-export const noiseDirtyFlagsStore = createDirtyFlags();
+export const noiseDirtyFlagsStore = createNoiseDirtyFlags();
+
+function createNoiseLayerDirtyFlag() {
+  const { subscribe, set } = writable(false);
+
+  noiseLayerStore.subscribe(() => set(true));
+
+  function clear() {
+    set(false);
+  }
+
+  return {
+    subscribe,
+    clear,
+  };
+}
+
+export const noiseLayerDirtyFlagStore = createNoiseLayerDirtyFlag();

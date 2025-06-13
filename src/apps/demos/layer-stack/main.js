@@ -3,6 +3,7 @@ import { get } from "svelte/store";
 import { buildTypographyCanvas } from "$lib/typography/buildTypographyCanvas.js";
 import { ImageDataAdapter } from "$lib/layers/ImageDataAdapter.js";
 
+import { NullNoise2DTime } from "$lib/noise/NullNoise2DTime.js";
 import { instantiateNoise } from "$lib/noise/instantiateNoise.js";
 import { NoiseAdapter } from "$lib/layers/NoiseAdapter.js";
 
@@ -25,6 +26,7 @@ import { layerStackStore } from "./stores/layerStack.js";
 import { maskLayerStore } from "./stores/maskLayer.js";
 import {
   noiseLayerStore,
+  noiseLayerDirtyFlagStore,
   noiseTypeStore,
   noiseTypeToStore,
   noiseDirtyFlagsStore,
@@ -103,29 +105,7 @@ function updateTypography() {
 updateTypography();
 
 // Noise layer
-let currentNoiseFlags = {};
-noiseDirtyFlagsStore.subscribe((flags) => {
-  currentNoiseFlags = flags;
-});
-
-let noise = null;
-let lastNoise = null;
-
-function instantiateNoiseIfNeeded() {
-  const type = get(noiseTypeStore);
-  const store = noiseTypeToStore[type];
-  if (!store) throw new Error("Unknown noise type: " + type);
-
-  const params = get(store);
-  const flags = currentNoiseFlags;
-
-  if (flags[type] || flags.noiseType) {
-    noise = instantiateNoise(type, params);
-    noiseDirtyFlagsStore.clear(type);
-    noiseDirtyFlagsStore.clear("noiseType");
-  }
-}
-instantiateNoiseIfNeeded();
+let noise = new NullNoise2DTime();
 
 const noiseLayerParams = get(noiseLayerStore);
 const noiseLayer = new NoiseAdapter(
@@ -135,6 +115,38 @@ const noiseLayer = new NoiseAdapter(
   noiseLayerParams.frequency,
   noiseLayerParams.noiseTimeScale
 );
+
+function updateNoise() {
+  const noiseLayerParams = get(noiseLayerStore);
+  noiseLayer.enabled = noiseLayerParams.enabled;
+
+  if (noiseLayer.enabled) {
+    // Layer
+    if (get(noiseLayerDirtyFlagStore)) {
+      noiseLayer.gain = noiseLayerParams.gain;
+      noiseLayer.frequency = noiseLayerParams.frequency;
+      noiseLayer.noiseTimeScale = noiseLayerParams.noiseTimeScale;
+      noiseLayerDirtyFlagStore.clear();
+    }
+
+    // Noise
+    const noiseType = get(noiseTypeStore);
+    const noiseStore = noiseTypeToStore[noiseType];
+    if (!noiseStore) throw new Error("Unknown noise type: " + noiseType);
+
+    const flags = get(noiseDirtyFlagsStore);
+    if (flags[noiseType] || flags.noiseType) {
+      // The noiseType or a parameter of the current noiseType changed
+      const noiseParams = get(noiseStore);
+      noise = instantiateNoise(noiseType, noiseParams);
+      noiseLayer.attachNoise(noise);
+      noiseDirtyFlagsStore.clear(noiseType);
+      noiseDirtyFlagsStore.clear("noiseType");
+    }
+  }
+}
+
+updateNoise();
 
 // Noise layer mask
 const maskLayerParams = get(maskLayerStore);
@@ -197,17 +209,7 @@ function update(now, dt) {
   stack.blendingFunc = blendingFunctions[get(layerStackStore).blendingMode];
 
   updateTypography();
-  instantiateNoiseIfNeeded();
-
-  const noiseLayerParams = get(noiseLayerStore);
-  if (lastNoise !== noise) {
-    noiseLayer.attachNoise(noise);
-    lastNoise = noise;
-  }
-  noiseLayer.enabled = noiseLayerParams.enabled;
-  noiseLayer.gain = noiseLayerParams.gain;
-  noiseLayer.frequency = noiseLayerParams.frequency;
-  noiseLayer.noiseTimeScale = noiseLayerParams.noiseTimeScale;
+  updateNoise();
 
   const maskLayerParams = get(maskLayerStore);
   maskLayer.enableMasking = maskLayerParams.enableMasking;
