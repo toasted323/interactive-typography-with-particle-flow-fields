@@ -1,6 +1,6 @@
 import { get } from "svelte/store";
 
-import { TypographyBuilder } from "$lib/typography/TypographyBuilder.js";
+import { buildTypographyCanvas } from "$lib/typography/buildTypographyCanvas.js";
 import { ImageDataAdapter } from "$lib/layers/ImageDataAdapter.js";
 
 import { PerlinNoise2DTime } from "$lib/noise/PerlinNoise2DTime.js";
@@ -84,33 +84,16 @@ function renderTypographyIfNeeded() {
   if (typographyDirty) {
     const layerParams = get(typographyLayerStore);
     const typographyParams = get(typographyStore);
-    const p = { ...layerParams, ...typographyParams };
 
-    typographyLayer.enabled = p.enabled;
+    typographyLayer.enabled = layerParams.enabled;
     if (typographyLayer.enabled) {
-      typographyLayer.gain = p.gain;
+      typographyLayer.gain = layerParams.gain;
 
-      const builder = TypographyBuilder.create(width, height)
-        .text(p.text)
-        .fontFamily(p.fontFamily)
-        .padding(p.padding)
-        .fillStyle(p.fillStyle)
-        .strokeStyle(p.strokeStyle, p.strokeWidth)
-        .background(p.backgroundColor)
-        .glow(p.glowColor, p.glowSize, p.shadowOffsetX, p.shadowOffsetY)
-        .blur(p.blurAmount)
-        .innerGlow(p.innerGlowColor, p.innerGlowBlur);
-
-      if (p.useGradient) {
-        builder.gradient(p.gradientColors);
-      }
-      if (p.fontSizeAuto) {
-        builder.autoFontSize(true);
-      } else {
-        builder.fontSize(p.fontSizeManual);
-      }
-
-      const typographyCanvas = builder.toCanvas();
+      const typographyCanvas = buildTypographyCanvas(
+        typographyParams,
+        canvas.width,
+        canvas.height
+      );
       typographyLayer.imageData = typographyCanvas
         .getContext("2d")
         .getImageData(0, 0, width, height);
