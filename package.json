@@ -7,7 +7,8 @@
         "build:demos": "rollup -c rollup.demos.config.js",
         "copy:licenses": "rollup -c rollup.copy-licenses.config.js",
         "build": "npm run build:demos && npm run copy:licenses",
-        "serve:public": "serve public"
+        "serve:public": "serve public",
+        "test": "NODE_OPTIONS='--experimental-vm-modules' jest"
     },
     "keywords": [
         "javascript",
@@ -27,6 +28,7 @@
         "@rollup/plugin-node-resolve": "^16.0.1",
         "@rollup/plugin-terser": "^0.4.4",
         "eslint": "^8.0.0",
+        "jest": "^30.0.0",
         "rollup": "^2.79.2",
         "rollup-plugin-copy": "^3.5.0",
         "rollup-plugin-css-only": "^4.5.2",
@@ -39,5 +41,6 @@
         "svelte-tweakpane-ui": "^1.5.8",
         "tweakpane": "^4.0.5"
     },
-    "private": true
+    "private": true,
+    "type": "module"
 }
