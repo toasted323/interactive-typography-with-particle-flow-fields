@@ -1,4 +1,4 @@
-import { randHash } from "./Rng.js";
+import { randHash } from "./random.js";
 
 /**
  * Returns all (x, y) locations within [width, height] where layer.getValue(x, y) > threshold.

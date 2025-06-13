@@ -1,7 +1,7 @@
-import { PerlinNoise2DTime } from "$lib/noise/PerlinNoise2DTime.js";
-import { FlowNoise2DTime } from "$lib/noise/FlowNoise2DTime.js";
-import { FBMNoise2DTime } from "$lib/noise/FBMNoise2DTime.js";
-import { TurbulenceNoise2DTime } from "$lib/noise/TurbulenceNoise2DTime.js";
+import { PerlinNoise2DTime } from "$lib/noise/perlin-noise-2d-time.js";
+import { FlowNoise2DTime } from "$lib/noise/flow-nose-2d-time.js";
+import { FBMNoise2DTime } from "$lib/noise/fbm-noise-2d-time.js";
+import { TurbulenceNoise2DTime } from "$lib/noise/turbulence-noise-2d-time.js";
 
 const noiseClasses = {
   PerlinNoise2DTime,

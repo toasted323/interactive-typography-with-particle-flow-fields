@@ -1,4 +1,4 @@
-import { buildTypographyCanvas } from "$lib/typography/buildTypographyCanvas.js";
+import { buildTypographyCanvas } from "$lib/typography/build-typography-canvas.js";
 
 import { typographyStore } from "./stores/typography.js";
 

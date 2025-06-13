@@ -1,10 +1,10 @@
 import { get } from "svelte/store";
 
-import { instantiateNoise } from "$lib/noise/instantiateNoise.js";
+import { instantiateNoise } from "$lib/noise/instantiate-noise.js";
 
-import { FpsChart } from "$apps/shared/utils/FpsChart.js";
-import { HistogramChart } from "$apps/shared/utils/HistogramChart.js";
-import { MinMaxChart } from "$apps/shared/utils/MinMaxChart.js";
+import { FpsChart } from "$apps/shared/utils/fps-chart.js";
+import { HistogramChart } from "$apps/shared/utils/histogram-chart.js";
+import { MinMaxChart } from "$apps/shared/utils/min-max-chart.js";
 
 import {
   noiseTypeStore,

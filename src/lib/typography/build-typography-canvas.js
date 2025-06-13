@@ -1,4 +1,4 @@
-import { TypographyBuilder } from "./TypographyBuilder.js";
+import { TypographyBuilder } from "./typography-builder.js";
 
 /**
  * Builds a canvas element containing rendered typography using the given parameters.

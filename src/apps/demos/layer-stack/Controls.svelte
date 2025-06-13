@@ -11,8 +11,8 @@
     Text,
   } from "svelte-tweakpane-ui";
 
-  import { layerStackStore, blendingOptions } from "./stores/layerStack.js";
-  import { maskLayerStore } from "./stores/maskLayer.js";
+  import { layerStackStore, blendingOptions } from "./stores/layer-stack.js";
+  import { maskLayerStore } from "./stores/mask-layer.js";
   import {
     noiseLayerStore,
     noiseTypeStore,
@@ -21,12 +21,12 @@
     flowStore,
     fbmStore,
     turbulenceStore,
-  } from "./stores/noiseLayer.js";
+  } from "./stores/noise-layer.js";
   import {
     typographyLayerStore,
     fontFamilyOptions,
     typographyStore,
-  } from "./stores/typographyLayer.js";
+  } from "./stores/typography-layer.js";
   import { simulationStore } from "./stores/simulation.js";
   import { COLOR_MODE, colorModeOptions, uiStore } from "./stores/ui.js";
 

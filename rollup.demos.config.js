@@ -21,12 +21,12 @@ const svelteOptions = {
 
 export default [
   {
-    input: "src/apps/demos/noise2dtime/main.js",
+    input: "src/apps/demos/noise-2d-time/main.js",
     output: {
       sourcemap: true,
       format: "iife",
       name: "Noise2DTime",
-      file: "public/demos/noise2dtime/bundle.js",
+      file: "public/demos/noise-2d-time/bundle.js",
     },
     plugins: [
       alias({ entries: aliasEntries }),

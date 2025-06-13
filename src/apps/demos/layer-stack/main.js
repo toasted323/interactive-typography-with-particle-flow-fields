@@ -1,14 +1,14 @@
 import { get } from "svelte/store";
 
-import { buildTypographyCanvas } from "$lib/typography/buildTypographyCanvas.js";
-import { ImageDataAdapter } from "$lib/layers/ImageDataAdapter.js";
+import { buildTypographyCanvas } from "$lib/typography/build-typography-canvas.js";
+import { ImageDataAdapter } from "$lib/layers/image-data-adapter.js";
 
-import { NullNoise2DTime } from "$lib/noise/NullNoise2DTime.js";
-import { instantiateNoise } from "$lib/noise/instantiateNoise.js";
-import { NoiseAdapter } from "$lib/layers/NoiseAdapter.js";
+import { NullNoise2DTime } from "$lib/noise/null-noise-2d-time.js";
+import { instantiateNoise } from "$lib/noise/instantiate-noise.js";
+import { NoiseAdapter } from "$lib/layers/noise-adapter.js";
 
-import { LayerStack } from "$lib/layers/LayerStack.js";
-import { MaskDecoratorCircle } from "$lib/layers/MaskDecoratorCircle.js";
+import { LayerStack } from "$lib/layers/layer-stack.js";
+import { MaskDecoratorCircle } from "$lib/layers/mask-decorator-circle.js";
 import {
   additiveBlending,
   subtractBlending,
@@ -20,23 +20,23 @@ import {
   averageBlending,
 } from "$lib/layers/blending.js";
 
-import { FpsChart } from "$apps/shared/utils/FpsChart.js";
+import { FpsChart } from "$apps/shared/utils/fps-chart.js";
 
-import { layerStackStore } from "./stores/layerStack.js";
-import { maskLayerStore } from "./stores/maskLayer.js";
+import { layerStackStore } from "./stores/layer-stack.js";
+import { maskLayerStore } from "./stores/mask-layer.js";
 import {
   noiseLayerStore,
   noiseLayerDirtyFlagStore,
   noiseTypeStore,
   noiseTypeToStore,
   noiseDirtyFlagsStore,
-} from "./stores/noiseLayer.js";
+} from "./stores/noise-layer.js";
 import {
   typographyLayerStore,
   typographyLayerDirtyFlagStore,
   typographyStore,
   typographyDirtyFlagStore,
-} from "./stores/typographyLayer.js";
+} from "./stores/typography-layer.js";
 import { simulationStore } from "./stores/simulation.js";
 import { COLOR_MODE, uiStore } from "./stores/ui.js";
 

@@ -21,7 +21,7 @@ Inspired by an original AS3 implementation, reimagined in JavaScript.
 
 These live demos are both interactive showcases and also serve as visual testing environments.
 
-- [Noise2DTime Demo](https://toasted323.github.io/interactive-typography-with-particle-flow-fields/demos/noise2dtime/)
+- [Noise2DTime Demo](https://toasted323.github.io/interactive-typography-with-particle-flow-fields/demos/noise-2d-time/)
 - [TypographyBuilder Demo](https://toasted323.github.io/interactive-typography-with-particle-flow-fields/demos/typography-builder/)
 - [LayerStack Demo](https://toasted323.github.io/interactive-typography-with-particle-flow-fields/demos/layer-stack/)
 
@@ -102,7 +102,7 @@ attributed as follows:
 
 **For technical demo content, reference as shown below:**
 
-> [Noise2DTime Demo](https://toasted323.github.io/interactive-typography-with-particle-flow-fields/demos/noise2dtime/) by [github.com/toasted323](https://github.com/toasted323) is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+> [Noise2DTime Demo](https://toasted323.github.io/interactive-typography-with-particle-flow-fields/demos/noise-2d-time/) by [github.com/toasted323](https://github.com/toasted323) is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 
 **For main content, follow this attribution example:**
 
