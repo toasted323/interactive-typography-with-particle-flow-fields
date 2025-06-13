@@ -158,33 +158,61 @@ const maskLayer = new MaskDecoratorCircle(noiseLayer, {
   autoFadeDuration: maskLayerParams.autoFadeDuration,
 });
 
-{
-  let isMouseDown = false;
+let isMouseDown = false;
 
-  canvas.addEventListener("mousedown", (ev) => {
-    if (!maskLayer.enabled || !maskLayer.enableMasking) return;
-    isMouseDown = true;
-    const rect = canvas.getBoundingClientRect();
-    const x = ((ev.clientX - rect.left) / rect.width) * width;
-    const y = ((ev.clientY - rect.top) / rect.height) * height;
-    maskLayer.activate(x, y, state.t);
-  });
+function handleMouseDown(ev) {
+  if (!maskLayer.enabled || !maskLayer.enableMasking) return;
+  isMouseDown = true;
+  const rect = canvas.getBoundingClientRect();
+  const x = ((ev.clientX - rect.left) / rect.width) * width;
+  const y = ((ev.clientY - rect.top) / rect.height) * height;
+  maskLayer.activate(x, y, state.t);
+}
 
-  canvas.addEventListener("mousemove", (ev) => {
-    if (!maskLayer.enabled || !maskLayer.enableMasking) return;
-    if (!isMouseDown) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = ((ev.clientX - rect.left) / rect.width) * width;
-    const y = ((ev.clientY - rect.top) / rect.height) * height;
-    maskLayer.update(x, y, state.t);
-  });
+function handleMouseMove(ev) {
+  if (!maskLayer.enabled || !maskLayer.enableMasking) return;
+  if (!isMouseDown) return;
+  const rect = canvas.getBoundingClientRect();
+  const x = ((ev.clientX - rect.left) / rect.width) * width;
+  const y = ((ev.clientY - rect.top) / rect.height) * height;
+  maskLayer.update(x, y, state.t);
+}
 
-  canvas.addEventListener("mouseup", (ev) => {
-    if (!maskLayer.enabled || !maskLayer.enableMasking) return;
-    if (!isMouseDown) return;
-    isMouseDown = false;
-    maskLayer.deactivate(state.t);
-  });
+function handleMouseUp(ev) {
+  if (!maskLayer.enabled || !maskLayer.enableMasking) return;
+  if (!isMouseDown) return;
+  isMouseDown = false;
+  maskLayer.deactivate(state.t);
+}
+
+function addMaskListeners() {
+  canvas.addEventListener("mousedown", handleMouseDown);
+  canvas.addEventListener("mousemove", handleMouseMove);
+  canvas.addEventListener("mouseup", handleMouseUp);
+}
+
+function removeMaskListeners() {
+  canvas.removeEventListener("mousedown", handleMouseDown);
+  canvas.removeEventListener("mousemove", handleMouseMove);
+  canvas.removeEventListener("mouseup", handleMouseUp);
+}
+
+let maskListenersAttached = false;
+
+function updateMask() {
+  const maskLayerParams = get(maskLayerStore);
+  maskLayer.enableMasking = maskLayerParams.enableMasking;
+  maskLayer.radius = maskLayerParams.radius;
+  maskLayer.fadeOutDuration = maskLayerParams.fadeOutDuration;
+  maskLayer.autoFadeDuration = maskLayerParams.autoFadeDuration;
+
+  if (maskLayer.enableMasking && !maskListenersAttached) {
+    addMaskListeners();
+    maskListenersAttached = true;
+  } else if (!maskLayer.enableMasking && maskListenersAttached) {
+    removeMaskListeners();
+    maskListenersAttached = false;
+  }
 }
 
 // Layer stack
@@ -210,12 +238,7 @@ function update(now, dt) {
 
   updateTypography();
   updateNoise();
-
-  const maskLayerParams = get(maskLayerStore);
-  maskLayer.enableMasking = maskLayerParams.enableMasking;
-  maskLayer.radius = maskLayerParams.radius;
-  maskLayer.fadeOutDuration = maskLayerParams.fadeOutDuration;
-  maskLayer.autoFadeDuration = maskLayerParams.autoFadeDuration;
+  updateMask();
 
   const { animating, timeScale, useAdvanceTime } = get(simulationStore);
 
