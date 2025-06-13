@@ -3,10 +3,7 @@ import { get } from "svelte/store";
 import { buildTypographyCanvas } from "$lib/typography/buildTypographyCanvas.js";
 import { ImageDataAdapter } from "$lib/layers/ImageDataAdapter.js";
 
-import { PerlinNoise2DTime } from "$lib/noise/PerlinNoise2DTime.js";
-import { FlowNoise2DTime } from "$lib/noise/FlowNoise2DTime.js";
-import { FBMNoise2DTime } from "$lib/noise/FBMNoise2DTime.js";
-import { TurbulenceNoise2DTime } from "$lib/noise/TurbulenceNoise2DTime.js";
+import { instantiateNoise } from "$lib/noise/instantiateNoise.js";
 import { NoiseAdapter } from "$lib/layers/NoiseAdapter.js";
 
 import { LayerStack } from "$lib/layers/LayerStack.js";
@@ -112,13 +109,6 @@ noiseDirtyFlagsStore.subscribe((flags) => {
 let noise = null;
 let lastNoise = null;
 
-const noiseClasses = {
-  PerlinNoise2DTime,
-  FlowNoise2DTime,
-  FBMNoise2DTime,
-  TurbulenceNoise2DTime,
-};
-
 function instantiateNoiseIfNeeded() {
   const type = get(noiseTypeStore);
   const store = noiseTypeToStore[type];
@@ -128,34 +118,7 @@ function instantiateNoiseIfNeeded() {
   const flags = currentNoiseFlags;
 
   if (flags[type] || flags.noiseType) {
-    let instance;
-    if (type === "FBMNoise2DTime" || type === "TurbulenceNoise2DTime") {
-      const baseType = params.baseType;
-      const baseParams =
-        baseType === "PerlinNoise2DTime"
-          ? params.perlinBaseParams
-          : params.flowBaseParams;
-
-      const BaseNoiseClass = noiseClasses[baseType];
-      if (!BaseNoiseClass)
-        throw new Error("Unknown base noise type: " + baseType);
-
-      const baseNoise = new BaseNoiseClass(baseParams);
-
-      const octaveParams = {
-        octaves: params.octaves,
-        persistence: params.persistence,
-        lacunarity: params.lacunarity,
-      };
-
-      const OctaveNoiseClass = noiseClasses[type];
-      instance = new OctaveNoiseClass(baseNoise, octaveParams);
-    } else {
-      const NoiseClass = noiseClasses[type];
-      instance = new NoiseClass(params);
-    }
-
-    noise = instance;
+    noise = instantiateNoise(type, params);
     noiseDirtyFlagsStore.clear(type);
     noiseDirtyFlagsStore.clear("noiseType");
   }
