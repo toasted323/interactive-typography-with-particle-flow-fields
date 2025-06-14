@@ -198,24 +198,31 @@ function render() {
 
   if (showScaleVisualization) {
     renderGrid(ctx, width, height, frequency);
-    const period = 1 / (frequency * noiseTimeScale);
-    const progress = (state.t % period) / period;
-    renderPieChart(ctx, width - 50, 50, 20, progress);
+      const period = 1 / (frequency * noiseTimeScale);
+      const progress = (state.t % period) / period;
+      renderPieChart(ctx, width - 50, 50, 20, progress);
   }
 
-  histogramChart.draw();
-  minMaxChart.draw();
-  fpsChart.draw();
+    histogramChart.draw();
+    minMaxChart.draw();
+    fpsChart.draw();
 }
 
-let lastNow = performance.now();
+let lastNow;
+let firstFrame = true;
 
-function loop(now = performance.now()) {
-  const dt = (now - lastNow) / 1000;
-  lastNow = now;
-  update(now, dt);
-  render();
-  requestAnimationFrame(loop);
+function loop(now) {
+    if (firstFrame) {
+        lastNow = now;
+        firstFrame = false;
+        requestAnimationFrame(loop);
+        return;
+    }
+    const dt = (now - lastNow) / 1000;
+    lastNow = now;
+    update(now, dt);
+    render();
+    requestAnimationFrame(loop);
 }
 
-loop();
+requestAnimationFrame(loop);

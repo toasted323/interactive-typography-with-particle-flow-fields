@@ -89,9 +89,9 @@ function updateTypography() {
     if (get(typographyDirtyFlagStore)) {
       const typographyParams = get(typographyStore);
       const typographyCanvas = buildTypographyCanvas(
-        typographyParams,
-        canvas.width,
-        canvas.height
+          typographyParams,
+          width,
+          height
       );
       typographyLayer.imageData = typographyCanvas
         .getContext("2d")
@@ -352,9 +352,16 @@ function render() {
   fpsChart.draw();
 }
 
-let lastNow = performance.now();
+let lastNow;
+let firstFrame = true;
 
-function loop(now = performance.now()) {
+function loop(now) {
+  if (firstFrame) {
+    lastNow = now;
+    firstFrame = false;
+    requestAnimationFrame(loop);
+    return;
+  }
   const dt = (now - lastNow) / 1000;
   lastNow = now;
   update(now, dt);
@@ -362,4 +369,4 @@ function loop(now = performance.now()) {
   requestAnimationFrame(loop);
 }
 
-loop();
+requestAnimationFrame(loop);
