@@ -34,6 +34,10 @@ import {
   noiseDirtyFlagsStore,
 } from "$apps/shared/stores/noise.js";
 import {
+  noiseSamplingDirtyFlagsStore,
+  noiseSamplingStore,
+} from "$apps/shared/stores/noise-sampling.js";
+import {
   typographyLayerStore,
   typographyLayerDirtyFlagStore,
 } from "$apps/shared/stores/typography-layer.js";
@@ -112,25 +116,32 @@ updateTypography();
 let noise = new NullNoise2DTime();
 
 const noiseLayerParams = get(noiseLayerStore);
+const noiseSamplingParams = get(noiseSamplingStore);
 const noiseLayer = new NoiseAdapter(
   noise,
   noiseLayerParams.enabled,
   noiseLayerParams.gain,
-  noiseLayerParams.frequency,
-  noiseLayerParams.noiseTimeScale
+  noiseSamplingParams.frequency,
+  noiseSamplingParams.timeScale
 );
 
 function updateNoise() {
   const noiseLayerParams = get(noiseLayerStore);
+
   noiseLayer.enabled = noiseLayerParams.enabled;
 
   if (noiseLayer.enabled) {
     // Layer
     if (get(noiseLayerDirtyFlagStore)) {
       noiseLayer.gain = noiseLayerParams.gain;
-      noiseLayer.frequency = noiseLayerParams.frequency;
-      noiseLayer.noiseTimeScale = noiseLayerParams.noiseTimeScale;
       noiseLayerDirtyFlagStore.clear();
+    }
+
+    // Noise sampling parameters
+    const noiseSamplingParams = get(noiseSamplingStore);
+    if (get(noiseSamplingDirtyFlagsStore)) {
+      noiseLayer.frequency = noiseSamplingParams.frequency;
+      noiseLayer.noiseTimeScale = noiseSamplingParams.timeScale;
     }
 
     // Noise

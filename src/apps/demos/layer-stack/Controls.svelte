@@ -25,6 +25,7 @@
     fbmStore,
     turbulenceStore,
   } from "$apps/shared/stores/noise.js";
+  import { noiseSamplingStore } from "$apps/shared/stores/noise-sampling.js";
   import { typographyLayerStore } from "$apps/shared/stores/typography-layer.js";
   import {
     fontFamilyOptions,
@@ -363,16 +364,16 @@
         min={0.001}
         max={1}
         step={0.001}
-        value={$noiseLayerStore.frequency}
-        on:change={(e) => noiseLayerStore.setFrequency(e.detail.value)}
+        value={$noiseSamplingStore.frequency}
+        on:change={(e) => noiseSamplingStore.setFrequency(e.detail.value)}
       />
       <Slider
         label="Noise Time Scale"
         min={0.1}
         max={1000}
         step={0.1}
-        value={$noiseLayerStore.noiseTimeScale}
-        on:change={(e) => noiseLayerStore.setNoiseTimeScale(e.detail.value)}
+        value={$noiseSamplingStore.timeScale}
+        on:change={(e) => noiseSamplingStore.setTimeScale(e.detail.value)}
       />
     </Folder>
 

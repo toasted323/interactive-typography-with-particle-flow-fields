@@ -1,12 +1,9 @@
 import { writable } from "svelte/store";
 
-// --- Noise layer ---
 function createNoiseLayerStore() {
   const defaults = {
     enabled: true,
     gain: 1,
-    frequency: 0.05,
-    noiseTimeScale: 20.0,
   };
   const { subscribe, set, update } = writable({ ...defaults });
   return {
@@ -18,12 +15,6 @@ function createNoiseLayerStore() {
     },
     setGain(gain) {
       update((state) => ({ ...state, gain }));
-    },
-    setFrequency(frequency) {
-      update((state) => ({ ...state, frequency }));
-    },
-    setNoiseTimeScale(noiseTimeScale) {
-      update((state) => ({ ...state, noiseTimeScale }));
     },
     reset() {
       set({ ...defaults });
