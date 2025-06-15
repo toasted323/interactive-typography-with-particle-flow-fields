@@ -1,6 +1,6 @@
 import { buildTypographyCanvas } from "$lib/typography/build-typography-canvas.js";
 
-import { typographyStore } from "./stores/typography.js";
+import {typographyStore} from "$apps/shared/stores/typography.js";
 
 import Controls from "./Controls.svelte";
 

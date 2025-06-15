@@ -1,5 +1,5 @@
 <script>
-  import {
+    import {
     Pane,
     Folder,
     Slider,
@@ -7,14 +7,17 @@
     Checkbox,
     Color,
     Text,
-  } from "svelte-tweakpane-ui";
-  import { fontFamilyOptions, typographyStore } from "./stores/typography.js";
+    } from "svelte-tweakpane-ui";
+    import {
+    fontFamilyOptions,
+    typographyStore,
+    } from "$apps/shared/stores/typography.js";
 
-  const gradientLabels = [
+    const gradientLabels = [
     "Gradient Color 1",
     "Gradient Color 2",
     "Gradient Color 3",
-  ];
+    ];
 </script>
 
 <Pane title="Typography Controls">

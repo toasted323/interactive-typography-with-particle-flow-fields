@@ -12,7 +12,7 @@ export const fontFamilyOptions = [
   { text: "Times New Roman", value: FONT_FAMILIES.TIMES_NEW_ROMAN },
 ];
 
-function createTypographyParams() {
+function createTypographyStore() {
   const defaults = {
     text: "Hello World",
     fontFamily: FONT_FAMILIES.ARIAL,
@@ -69,10 +69,10 @@ function createTypographyParams() {
   };
 }
 
-export const typographyStore = createTypographyParams();
+export const typographyStore = createTypographyStore();
 
 // --- Dirty flags ---
-function createTypographyDirtyFlag() {
+function createTypographyDirtyFlagStore() {
   const { subscribe, set } = writable(true); // initially dirty
 
   typographyStore.subscribe(() => set(true));
@@ -87,4 +87,4 @@ function createTypographyDirtyFlag() {
   };
 }
 
-export const typographyDirtyFlagStore = createTypographyDirtyFlag();
+export const typographyDirtyFlagStore = createTypographyDirtyFlagStore();
