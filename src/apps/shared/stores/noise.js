@@ -1,37 +1,5 @@
 import { writable } from "svelte/store";
 
-// --- Noise layer ---
-function createNoiseLayerParams() {
-  const defaults = {
-    enabled: true,
-    gain: 1,
-    frequency: 0.05,
-    noiseTimeScale: 20.0,
-  };
-  const { subscribe, set, update } = writable({ ...defaults });
-  return {
-    subscribe,
-    set,
-    update,
-    setEnabled(enabled) {
-      update((state) => ({ ...state, enabled }));
-    },
-    setGain(gain) {
-      update((state) => ({ ...state, gain }));
-    },
-    setFrequency(frequency) {
-      update((state) => ({ ...state, frequency }));
-    },
-    setNoiseTimeScale(noiseTimeScale) {
-      update((state) => ({ ...state, noiseTimeScale }));
-    },
-    reset() {
-      set({ ...defaults });
-    },
-  };
-}
-export const noiseLayerStore = createNoiseLayerParams();
-
 // --- Null noise params ---
 function createNullNoiseParams() {
   const defaults = {}; // No params
@@ -43,6 +11,7 @@ function createNullNoiseParams() {
     reset: () => set({ ...defaults }),
   };
 }
+
 export const nullNoiseStore = createNullNoiseParams();
 
 // --- Perlin noise params ---
@@ -57,6 +26,7 @@ function createPerlinParams() {
     reset: () => set({ ...defaults }),
   };
 }
+
 export const perlinStore = createPerlinParams();
 
 // --- Flow noise params ---
@@ -78,6 +48,7 @@ function createFlowParams() {
     reset: () => set({ ...defaults }),
   };
 }
+
 export const flowStore = createFlowParams();
 
 // --- FBM noise params ---
@@ -112,6 +83,7 @@ function createFBMParams() {
     reset: () => set({ ...defaults }),
   };
 }
+
 export const fbmStore = createFBMParams();
 
 // --- Turbulence noise params ---
@@ -146,6 +118,7 @@ function createTurbulenceParams() {
     reset: () => set({ ...defaults }),
   };
 }
+
 export const turbulenceStore = createTurbulenceParams();
 
 // --- Noise type ---
@@ -173,6 +146,7 @@ function createNoiseTypeParam() {
     reset: () => set(DEFAULT),
   };
 }
+
 export const noiseTypeStore = createNoiseTypeParam();
 
 // --- Dirty flags ---
@@ -204,8 +178,9 @@ function createNoiseDirtyFlags() {
   function clear(flag) {
     update((flags) => ({ ...flags, [flag]: false }));
   }
+
   function clearAll() {
-    set({ ...defaults });
+    set({...defaults});
   }
 
   return {
@@ -216,20 +191,3 @@ function createNoiseDirtyFlags() {
 }
 
 export const noiseDirtyFlagsStore = createNoiseDirtyFlags();
-
-function createNoiseLayerDirtyFlag() {
-  const { subscribe, set } = writable(false);
-
-  noiseLayerStore.subscribe(() => set(true));
-
-  function clear() {
-    set(false);
-  }
-
-  return {
-    subscribe,
-    clear,
-  };
-}
-
-export const noiseLayerDirtyFlagStore = createNoiseLayerDirtyFlag();

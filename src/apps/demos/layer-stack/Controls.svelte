@@ -11,24 +11,31 @@
     Text,
   } from "svelte-tweakpane-ui";
 
-  import { layerStackStore, blendingOptions } from "./stores/layer-stack.js";
-  import { maskLayerStore } from "./stores/mask-layer.js";
   import {
-    noiseLayerStore,
+    layerStackStore,
+    blendingOptions,
+  } from "$apps/shared/stores/layer-stack.js";
+  import { maskLayerStore } from "$apps/shared/stores/mask-layer.js";
+  import { noiseLayerStore } from "$apps/shared/stores/noise-layer.js";
+  import {
     noiseTypeStore,
     noiseTypeOptions,
     perlinStore,
     flowStore,
     fbmStore,
     turbulenceStore,
-  } from "./stores/noise-layer.js";
+  } from "$apps/shared/stores/noise.js";
+  import { typographyLayerStore } from "$apps/shared/stores/typography-layer.js";
   import {
-    typographyLayerStore,
     fontFamilyOptions,
     typographyStore,
-  } from "./stores/typography-layer.js";
-  import { simulationStore } from "./stores/simulation.js";
-  import { COLOR_MODE, colorModeOptions, uiStore } from "./stores/ui.js";
+  } from "$apps/shared/stores/typography.js";
+  import { simulationStore } from "$apps/shared/stores/simulation.js";
+  import {
+    COLOR_MODE,
+    colorModeOptions,
+    uiStore,
+  } from "$apps/shared/stores/ui.js";
 
   const gradientLabels = [
     "Gradient Color 1",

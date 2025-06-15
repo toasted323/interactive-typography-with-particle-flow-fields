@@ -22,23 +22,27 @@ import {
 
 import { FpsChart } from "$apps/shared/utils/fps-chart.js";
 
-import { layerStackStore } from "./stores/layer-stack.js";
-import { maskLayerStore } from "./stores/mask-layer.js";
+import { layerStackStore } from "$apps/shared/stores/layer-stack.js";
+import { maskLayerStore } from "$apps/shared/stores/mask-layer.js";
 import {
   noiseLayerStore,
   noiseLayerDirtyFlagStore,
+} from "$apps/shared/stores/noise-layer.js";
+import {
   noiseTypeStore,
   noiseTypeToStore,
   noiseDirtyFlagsStore,
-} from "./stores/noise-layer.js";
+} from "$apps/shared/stores/noise.js";
 import {
   typographyLayerStore,
   typographyLayerDirtyFlagStore,
+} from "$apps/shared/stores/typography-layer.js";
+import {
   typographyStore,
   typographyDirtyFlagStore,
-} from "./stores/typography-layer.js";
-import { simulationStore } from "./stores/simulation.js";
-import { COLOR_MODE, uiStore } from "./stores/ui.js";
+} from "$apps/shared/stores/typography.js";
+import { simulationStore } from "$apps/shared/stores/simulation.js";
+import { COLOR_MODE, uiStore } from "$apps/shared/stores/ui.js";
 
 import Controls from "./Controls.svelte";
 
@@ -89,9 +93,9 @@ function updateTypography() {
     if (get(typographyDirtyFlagStore)) {
       const typographyParams = get(typographyStore);
       const typographyCanvas = buildTypographyCanvas(
-          typographyParams,
-          width,
-          height
+        typographyParams,
+        width,
+        height
       );
       typographyLayer.imageData = typographyCanvas
         .getContext("2d")
