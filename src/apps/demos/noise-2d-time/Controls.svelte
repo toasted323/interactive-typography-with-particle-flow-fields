@@ -15,13 +15,13 @@
     flowStore,
     fbmStore,
     turbulenceStore,
-    frequencyStore,
-    noiseTimeScaleStore,
-  } from "./stores/noise.js";
+  } from "$apps/shared/stores/noise.js";
 
-  import { simulationStore } from "./stores/simulation.js";
+  import { noiseSamplingStore } from "$apps/shared/stores/noise-sampling.js";
 
-  import { colorModeOptions, uiStore } from "./stores/ui.js";
+  import { simulationStore } from "$apps/shared/stores/simulation.js";
+
+  import { colorModeOptions, uiStore } from "$apps/shared/stores/ui.js";
 
   function resetAll() {
     // --- Noise ---
@@ -30,8 +30,9 @@
     flowStore.reset();
     fbmStore.reset();
     turbulenceStore.reset();
-    frequencyStore.reset();
-    noiseTimeScaleStore.reset();
+
+    // --- Noise sampling ---
+    noiseSamplingStore.reset();
 
     // --- Simulation ---
     simulationStore.reset();
@@ -282,16 +283,17 @@
       min={0.001}
       max={1}
       step={0.001}
-      value={$frequencyStore}
-      on:change={(e) => frequencyStore.set(e.detail.value)}
+      value={$noiseSamplingStore.frequency}
+      on:change={(e) => noiseSamplingStore.setFrequency(e.detail.value)}
     />
+
     <Slider
       label="Noise Time Scale"
       min={0.1}
       max={1000}
       step={0.1}
-      value={$noiseTimeScaleStore}
-      on:change={(e) => noiseTimeScaleStore.set(e.detail.value)}
+      value={$noiseSamplingStore.timeScale}
+      on:change={(e) => noiseSamplingStore.setTimeScale(e.detail.value)}
     />
   </Folder>
 

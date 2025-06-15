@@ -9,13 +9,13 @@ import { MinMaxChart } from "$apps/shared/utils/min-max-chart.js";
 import {
   noiseTypeStore,
   noiseTypeToStore,
-  frequencyStore,
-  noiseTimeScaleStore,
   noiseDirtyFlagsStore,
-} from "./stores/noise.js";
+} from "$apps/shared/stores/noise.js";
+import { noiseSamplingStore } from "$apps/shared/stores/noise-sampling.js";
 
-import { simulationStore } from "./stores/simulation.js";
-import { COLOR_MODE, uiStore } from "./stores/ui.js";
+import { simulationStore } from "$apps/shared/stores/simulation.js";
+
+import { COLOR_MODE, uiStore } from "$apps/shared/stores/ui.js";
 
 import Controls from "./Controls.svelte";
 
@@ -64,33 +64,37 @@ function instantiateNoiseIfNeeded() {
     noiseDirtyFlagsStore.clear(noiseType);
     noiseDirtyFlagsStore.clear("noiseType");
 
-    const frequency = get(frequencyStore);
-    const noiseTimeScale = get(noiseTimeScaleStore);
-    noise.setTime(state.t * noiseTimeScale * frequency);
+    const { frequency: noiseFrequency, timeScale: noiseTimeScale } =
+        get(noiseSamplingStore);
+    noise.setTime(state.t * noiseTimeScale * noiseFrequency);
   }
 }
 
 function update(now, dt) {
   instantiateNoiseIfNeeded();
 
-  const { animating, timeScale, useAdvanceTime } = get(simulationStore);
-  const frequency = get(frequencyStore);
-  const noiseTimeScale = get(noiseTimeScaleStore);
+  const {
+    animating,
+    timeScale: simTimeScale,
+    useAdvanceTime,
+  } = get(simulationStore);
 
   if (animating) {
-    const newT = state.t + dt * timeScale;
+    const newT = state.t + dt * simTimeScale;
     state.t = newT;
 
+    const { frequency: noiseFrequency, timeScale: noiseTimeScale } =
+        get(noiseSamplingStore);
     if (useAdvanceTime) {
-      noise.advanceTime(dt * timeScale * noiseTimeScale * frequency);
+      noise.advanceTime(dt * simTimeScale * noiseTimeScale * noiseFrequency);
     } else {
-      noise.setTime(newT * noiseTimeScale * frequency);
+      noise.setTime(newT * noiseTimeScale * noiseFrequency);
     }
 
     let noiseValues = [];
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        const value = noise.getValue(x * frequency, y * frequency);
+        const value = noise.getValue(x * noiseFrequency, y * noiseFrequency);
         noiseValues.push(value);
       }
     }
@@ -149,8 +153,9 @@ function renderPieChart(
 
 function render() {
   const noiseValues = state.noiseValues;
-  const frequency = get(frequencyStore);
-  const noiseTimeScale = get(noiseTimeScaleStore);
+  const { frequency: noiseFrequency, timeScale: noiseTimeScale } =
+    get(noiseSamplingStore);
+
   const { colorMode, showScaleVisualization } = get(uiStore);
 
   const img = ctx.createImageData(width, height);
@@ -197,32 +202,32 @@ function render() {
   ctx.putImageData(img, 0, 0);
 
   if (showScaleVisualization) {
-    renderGrid(ctx, width, height, frequency);
-      const period = 1 / (frequency * noiseTimeScale);
-      const progress = (state.t % period) / period;
-      renderPieChart(ctx, width - 50, 50, 20, progress);
+    renderGrid(ctx, width, height, noiseFrequency);
+    const period = 1 / (noiseFrequency * noiseTimeScale);
+    const progress = (state.t % period) / period;
+    renderPieChart(ctx, width - 50, 50, 20, progress);
   }
 
-    histogramChart.draw();
-    minMaxChart.draw();
-    fpsChart.draw();
+  histogramChart.draw();
+  minMaxChart.draw();
+  fpsChart.draw();
 }
 
 let lastNow;
 let firstFrame = true;
 
 function loop(now) {
-    if (firstFrame) {
-        lastNow = now;
-        firstFrame = false;
-        requestAnimationFrame(loop);
-        return;
-    }
-    const dt = (now - lastNow) / 1000;
+  if (firstFrame) {
     lastNow = now;
-    update(now, dt);
-    render();
+    firstFrame = false;
     requestAnimationFrame(loop);
+    return;
+  }
+  const dt = (now - lastNow) / 1000;
+  lastNow = now;
+  update(now, dt);
+  render();
+  requestAnimationFrame(loop);
 }
 
 requestAnimationFrame(loop);
