@@ -1,15 +1,15 @@
-import { FlowNoise2DTime } from "../../src/lib/noise/flow-nose-2d-time.js";
-import { PerlinNoise2DTime } from "../../src/lib/noise/perlin-noise-2d-time.js";
+import {FlowNoise2DTime} from "../../../src/lib/noise/flow-nose-2d-time.js";
+import {PerlinNoise2DTime} from "../../../src/lib/noise/perlin-noise-2d-time.js";
 
 function testRange(
-  noise,
-  {
-    xSteps = 100,
-    ySteps = 100,
-    tSteps = 100,
-    xStepSize = 0.1,
-    yStepSize = 0.1,
-    tStepSize = 0.1,
+    noise,
+    {
+      xSteps = 100,
+      ySteps = 100,
+      tSteps = 100,
+      xStepSize = 0.1,
+      yStepSize = 0.1,
+      tStepSize = 0.1,
     expectedMin = -1.0,
     expectedMax = 1.0,
   } = {}
