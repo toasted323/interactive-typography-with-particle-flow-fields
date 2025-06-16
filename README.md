@@ -116,10 +116,10 @@ The source code is licensed separately under the MIT License.
 
 ## References
 
-- Perlin, K. "An Image Synthesizer", SIGGRAPH, 1985.
-- Perlin, K., & Neyret, F. "Flow Noise", 2001.
-- Perlin, K. “Improving Noise”, ACM Transactions on Graphics (TOG), Vol. 21, No. 3, July 2002, pp. 681–682.
-- Bridson, R., Hourihan, J., & Nordenstam, M. "Curl-Noise for Procedural Fluid Flow", SIGGRAPH 2007.
+- Perlin, K. (1985). An image synthesizer. *SIGGRAPH '85: Proceedings of the 12th annual conference on Computer graphics and interactive techniques*, 287–296. https://doi.org/10.1145/325165.325247
+- Perlin, K., & Neyret, F. (2001, August). *Flow noise*. SIGGRAPH 2001 Technical Sketches and Applications.
+- Perlin, K. (2002). Improving noise. *ACM Transactions on Graphics, 21*(3), 681–682. https://doi.org/10.1145/566654.566636
+- Bridson, R., Hourihan, J., & Nordenstam, M. (2007). Curl-noise for procedural fluid flow. *ACM Transactions on Graphics, 26*(3), Article 46. https://doi.org/10.1145/1276377.1276435
 - [Stefan Gustavson, "perlin-noise" reference implementations](https://github.com/stegu/perlin-noise)
 - [josephg's noisejs repository](https://github.com/josephg/noisejs/blob/master/perlin.js)
 
